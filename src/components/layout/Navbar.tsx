@@ -16,8 +16,8 @@ export default function Navbar() {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href="/login" className="text-sm hover:text-blue-400">Masuk</Link>
-                    <Link href="/register" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full text-sm font-semibold transition">
+                    <Link href="/auth/login" className="text-sm hover:text-blue-400">Masuk</Link>
+                    <Link href="/auth/register" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full text-sm font-semibold transition">
                         Daftar Sekarang
                     </Link>
                 </div>

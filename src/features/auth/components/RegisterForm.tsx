@@ -1,37 +1,72 @@
 "use client";
 
-import { FiMail } from "react-icons/fi";
+import { useRegisterForm } from "../hooks/useRegisterForm";
+import { Button } from "@/features/auth/components/ui/button"; // Asumsi pakai Shadcn/UI
+import { Input } from "@/features/auth/components/ui/input";
+import { Label } from "@/features/auth/components/ui/label";
+import { Checkbox } from "./ui/checkbox";
 
 export default function RegisterForm() {
+    const { formik, isLoading } = useRegisterForm();
+    const termsError = formik.submitCount > 0 ? formik.errors.acceptTerms : null;
     return (
-        <form className="space-y-6">
-            <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-semibold text-slate-700 ml-1">
-                    Email
-                </label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                        <FiMail size={20} />
-                    </div>
-                    <input
-                        id="email"
-                        type="email"
-                        placeholder="nama@email.com"
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                        required
-                    />
-                </div>
-                <p className="text-xs text-slate-500 mt-2 ml-1 leading-relaxed">
-                    Kami akan mengirimkan link verifikasi ke email Anda.
-                </p>
-            </div>
+        <div className="grid gap-6">
+            <form onSubmit={formik.handleSubmit}>
+                <div className="grid gap-4">
 
-            <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all duration-200"
-            >
-                Register
-            </button>
-        </form>
+                    {/* Email Field */}
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            placeholder="nama@contoh.com"
+                            type="email"
+                            disabled={isLoading}
+                            value={formik.values.email}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                        />
+                        {formik.touched.email && formik.errors.email && (
+                            <p className="text-sm text-red-500">
+                                {formik.errors.email}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Terms Checkbox */}
+                    <div className="space-y-1">
+                        <div className="flex items-center space-x-2 mt-2">
+                            <Checkbox
+                                id="terms"
+                                checked={formik.values.acceptTerms}
+                                onCheckedChange={(checked) =>
+                                    formik.setFieldValue("acceptTerms", checked)
+                                }
+                                className={
+                                    termsError
+                                        ? "border-red-500 data-[state=unchecked]:border-red-500"
+                                        : ""
+                                }
+                            />
+                            <label
+                                htmlFor="terms"
+                                className={`text-sm font-medium leading-none cursor-pointer ${termsError ? "text-red-600" : "text-slate-700"
+                                    }`}
+                            >
+                                I agree to the Terms & Conditions
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button disabled={isLoading} type="submit"
+                        className="">
+                        {isLoading ? "Memproses..." : "Daftar Sekarang"}
+                    </Button>
+
+                </div>
+            </form>
+        </div>
     );
 }

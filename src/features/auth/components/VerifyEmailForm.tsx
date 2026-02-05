@@ -1,86 +1,126 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
+import { useVerifyForm } from "../hooks/useVerifyForm";
+import { Button } from "./ui/button"; // Asumsi path sesuai struktur kamu
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { FiLoader } from "react-icons/fi"; // Contoh icon loader
 
-export default function VerifyEmailForm() {
+interface VerifyEmailFormProps {
+    token: string;
+}
+
+export default function VerifyEmailForm({ token }: VerifyEmailFormProps) {
+    // Panggil hook dengan token
+    const { formik, isLoading, isVerifyingToken } = useVerifyForm(token);
+
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // TAMPILKAN LOADING SCREEN SAAT CEK TOKEN
+    if (isVerifyingToken) {
+        return (
+            <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                <FiLoader className="animate-spin text-blue-600" size={40} />
+                <p className="text-gray-500">Memvalidasi token anda...</p>
+            </div>
+        );
+    }
+
     return (
-        <form className="space-y-5">
+        <form onSubmit={formik.handleSubmit} className="space-y-5">
             {/* Full Name Field */}
             <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">
-                    Full Name
-                </label>
-                <input
-                    id="name"
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                    id="fullName"
+                    name="fullName"
                     type="text"
                     placeholder="John Doe"
-                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    required
+                    disabled={isLoading}
+                    value={formik.values.fullName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={formik.touched.fullName && formik.errors.fullName ? "border-red-500" : ""}
                 />
+                {formik.touched.fullName && formik.errors.fullName && (
+                    <p className="text-xs text-red-500 ml-1">{formik.errors.fullName}</p>
+                )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-                <div className="flex justify-between items-center ml-1">
-                    <label htmlFor="password" className="text-sm font-semibold text-slate-700">
-                        Password
-                    </label>
-                </div>
+                <Label htmlFor="password">New Password</Label>
                 <div className="relative">
-                    <input
+                    <Input
                         id="password"
+                        name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Masukkan password"
-                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
-                        required
+                        placeholder="Minimal 6 karakter"
+                        disabled={isLoading}
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`pr-12 ${formik.touched.password && formik.errors.password ? "border-red-500" : ""}`}
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                        tabIndex={-1}
                     >
                         {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                     </button>
                 </div>
+                {formik.touched.password && formik.errors.password && (
+                    <p className="text-xs text-red-500 ml-1">{formik.errors.password}</p>
+                )}
             </div>
+
             {/* Confirm Password Field */}
             <div className="space-y-2">
-                <div className="flex justify-between items-center ml-1">
-                    <label htmlFor="password" className="text-sm font-semibold text-slate-700">
-                        Confirm Password
-                    </label>
-                </div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                    <input
-                        id="confirm-password"
+                    <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Masukkan password"
-                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
-                        required
+                        placeholder="Ulangi password"
+                        disabled={isLoading}
+                        value={formik.values.confirmPassword}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`pr-12 ${formik.touched.confirmPassword && formik.errors.confirmPassword ? "border-red-500" : ""}`}
                     />
                     <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                        tabIndex={-1}
                     >
                         {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                     </button>
                 </div>
+                {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                    <p className="text-xs text-red-500 ml-1">{formik.errors.confirmPassword}</p>
+                )}
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-4"
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20"
             >
-                <FiLogIn size={20} />
-                Verify
-            </button>
+                {isLoading ? "Memproses..." : (
+                    <>
+                        <FiCheckCircle size={20} />
+                        Selesaikan Pendaftaran
+                    </>
+                )}
+            </Button>
         </form>
     );
 }

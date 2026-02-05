@@ -21,7 +21,7 @@ export default function RegisterForm() {
                             id="email"
                             name="email"
                             placeholder="nama@contoh.com"
-                            type="email"
+                            type="text"
                             disabled={isLoading}
                             value={formik.values.email}
                             onChange={formik.handleChange}

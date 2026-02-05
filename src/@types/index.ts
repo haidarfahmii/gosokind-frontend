@@ -2,6 +2,12 @@ export interface RegisterFormValues {
   email: string;
 }
 
+export interface VerifyFormValues {
+    fullName: string;
+    password: string;
+    token: string;
+}
+
 export interface User {
   id: string;
   name: string;

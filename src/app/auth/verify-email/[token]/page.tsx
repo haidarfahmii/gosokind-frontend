@@ -3,20 +3,27 @@ import { Metadata } from "next";
 import VerifyEmailForm from "@/features/auth/components/VerifyEmailForm";
 
 export const metadata: Metadata = {
-    title: "Masuk - GOSOKIND",
-    description: "Masuk untuk mengelola pesanan setrika Anda.",
+    title: "Verifikasi Akun - GOSOKIND",
+    description: "Lengkapi data diri Anda untuk menyelesaikan pendaftaran.",
 };
 
-export default function VerifyEmailPage() {
+interface PageProps {
+    params: Promise<{ token: string }>;
+}
+
+export default async function VerifyEmailPage({ params }: PageProps) {
+    // Pada Next.js 15, params adalah Promise yang harus di-await
+    const { token } = await params;
+
     return (
         <AuthLayout
-            title="Selamat Datang"
-            subtitle="Masuk untuk mengelola pesanan setrika Anda."
-            linkText="Belum punya akun?"
-            linkUrl="/auth/register"
-            linkLabel="Daftar disini"
+            title="Verifikasi Akun"
+            subtitle="Buat password dan lengkapi profil Anda."
+            linkText="Sudah punya akun?"
+            linkUrl="/auth/login"
+            linkLabel="Masuk disini"
         >
-            <VerifyEmailForm />
+            <VerifyEmailForm token={token} />
         </AuthLayout>
     );
 }

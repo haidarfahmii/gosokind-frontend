@@ -61,7 +61,7 @@ const nextAuthHandler = NextAuth({
               id: user.id,
               name: user.name,
               email: user.email,
-            //   role: user.role,
+              role: user.role,
               accessToken: token,
               avatarUrl: user.avatarUrl,
             };
@@ -83,7 +83,7 @@ const nextAuthHandler = NextAuth({
       if (user) {
         token.id = user?.id;
         token.email = user?.email;
-        // token.role = user?.role;
+        token.role = user?.role;
         token.name = user?.name;
         token.accessToken = user?.accessToken;
         token.avatarUrl = user?.avatarUrl;
@@ -124,7 +124,7 @@ const nextAuthHandler = NextAuth({
       if (token && session.user) {
         session.user.id = token.id;
         session.user.email = token.email;
-        // session.user.role = token.role;
+        session.user.role = token.role;
         session.user.accessToken = token.accessToken;
         session.user.name = token.name;
         session.user.avatarUrl = token.avatarUrl;

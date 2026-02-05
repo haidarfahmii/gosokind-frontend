@@ -8,10 +8,16 @@ export interface VerifyFormValues {
     token: string;
 }
 
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
+  role: string;
   phoneNumber?: string;
   birthDate?: string;
   avatarUrl?: string;

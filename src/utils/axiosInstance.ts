@@ -21,12 +21,16 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
+        // Cek apakah request ini minta untuk di-skip redirect-nya
+        if (error.config && error.config.skipAuthRedirect) {
+            return Promise.reject(error);
+        }
         // Jika error 401 (Unauthorized)
         if (error.response && error.response.status === 401) {
             // Cek apakah kita sedang di browser (client-side)
             if (typeof window !== "undefined") {
                 // Paksa logout NextAuth agar sesi frontend sinkron dengan backend
-                await signOut({ callbackUrl: "/login" });
+                await signOut({ callbackUrl: "/auth/login" });
             }
         }
         return Promise.reject(error);

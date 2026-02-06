@@ -13,6 +13,15 @@ export interface LoginFormValues {
   password: string;
 }
 
+export interface ForgotPasswordFormValues {
+  email: string;
+}
+
+export interface ResetPasswordFormValues {
+  password: string;
+  token: string;
+}
+
 export interface User {
   id: string;
   name: string;

@@ -3,14 +3,14 @@ import { Metadata } from "next";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-    title: "Daftar - GOSOKIND",
-    description: "Buat akun GOSOKIND baru.",
+    title: "Forgot Password - GOSOKIND",
+    description: "Lupa password akun GOSOKIND.",
 };
 
 export default function ForgotPasswordPage() {
     return (
         <AuthLayout
-            title="Buat Akun Baru"
+            title="Forgot Password"
             subtitle="Cukup masukkan email untuk mulai menggunakan layanan GOSOKIND."
             linkText="Sudah punya akun?"
             linkUrl="/auth/login"

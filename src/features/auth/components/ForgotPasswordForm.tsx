@@ -1,37 +1,68 @@
 "use client";
 
-import { FiMail } from "react-icons/fi";
+import { useForgotPasswordForm } from "../hooks/useForgotPasswordForm";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { FiCheckCircle } from "react-icons/fi"; // Opsional: icon sukses
 
 export default function ForgotPasswordForm() {
-    return (
-        <form className="space-y-6">
-            <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-semibold text-slate-700 ml-1">
-                    Email
-                </label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                        <FiMail size={20} />
-                    </div>
-                    <input
-                        id="email"
-                        type="email"
-                        placeholder="nama@email.com"
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                        required
-                    />
-                </div>
-                <p className="text-xs text-slate-500 mt-2 ml-1 leading-relaxed">
-                    Kami akan mengirimkan link reset password ke email Anda.
-                </p>
-            </div>
+    const { formik, isLoading, isSuccess } = useForgotPasswordForm();
 
-            <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all duration-200"
-            >
-                Submit
-            </button>
-        </form>
+    // Tampilkan pesan sukses jika email berhasil dikirim
+    if (isSuccess) {
+        return (
+            <div className="flex flex-col items-center justify-center text-center space-y-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <FiCheckCircle className="text-4xl text-green-600" />
+                <div>
+                    <h3 className="text-lg font-medium text-green-800">Email Terkirim!</h3>
+                    <p className="text-sm text-green-700 mt-1">
+                        Silakan periksa inbox (dan spam) email Anda untuk link reset password.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid gap-6">
+            <form onSubmit={formik.handleSubmit}>
+                <div className="grid gap-4">
+
+                    {/* Email Field */}
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="nama@email.com"
+                            disabled={isLoading}
+                            value={formik.values.email}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur} // Penting: agar validasi berjalan saat field ditinggalkan
+                        />
+
+                        {/* Error Message */}
+                        {formik.touched.email && formik.errors.email ? (
+                            <p className="text-sm text-red-500">
+                                {formik.errors.email}
+                            </p>
+                        ) : (
+                            // Helper text hanya muncul jika tidak ada error
+                            <p className="text-[0.8rem] text-slate-500">
+                                Kami akan mengirimkan link reset password ke email Anda.
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button disabled={isLoading} type="submit">
+                        {isLoading ? "Mengirim..." : "Reset Password"}
+                    </Button>
+
+                </div>
+            </form>
+        </div>
     );
 }

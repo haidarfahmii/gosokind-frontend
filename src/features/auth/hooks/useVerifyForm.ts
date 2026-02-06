@@ -1,38 +1,24 @@
 "use client";
 
 import { useFormik } from "formik";
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { authService } from "../services/auth.service";
 import { verifySchema } from "../schemas/verify.schema";
+import { useVerifyToken } from "./useVerifyToken"; // 1. Import hook shared
 
 export const useVerifyForm = (token: string) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [isVerifyingToken, setIsVerifyingToken] = useState(true); // State loading awal halaman
     const router = useRouter();
 
-    //validasi token saat halaman dimuat
-    useEffect(() => {
-        const validateToken = async () => {
-            try {
-                await authService.checkVerifyToken(token);
-                // Jika sukses, biarkan user di halaman ini (loading token selesai)
-                setIsVerifyingToken(false);
-            } catch (error) {
-                // Jika error (Token expired/invalid)
-                toast.error("Token verifikasi tidak valid atau sudah kadaluarsa.");
-                // Redirect balik ke Register
-                router.replace("/auth/register");
-            }
-        };
+    // 2. Gunakan hook untuk validasi token otomatis saat mount
+    const { isVerifyingToken, isTokenValid } = useVerifyToken({
+        token,
+         // Redirect jika token salah/expired
+        // redirectOnInvalid: "/auth/register",
+    });
 
-        if (token) {
-            validateToken();
-        }
-    }, [token, router]);
-
-    // 2. Formik Logic (tetap sama, hanya tambah validasi state)
     const formik = useFormik({
         initialValues: {
             fullName: "",
@@ -41,6 +27,12 @@ export const useVerifyForm = (token: string) => {
         },
         validationSchema: verifySchema,
         onSubmit: async (values) => {
+            // 3. Guard clause: Pastikan token valid sebelum submit
+            if (!isTokenValid) {
+                toast.error("Token tidak valid. Silakan daftar ulang.");
+                return;
+            }
+
             try {
                 setIsLoading(true);
                 await authService.verify({
@@ -62,6 +54,7 @@ export const useVerifyForm = (token: string) => {
     return {
         formik,
         isLoading,
-        isVerifyingToken, // Return state ini untuk UI
+        isVerifyingToken, // Return state loading token untuk UI
+        isTokenValid      // Return status validitas (opsional jika UI butuh)
     };
 };

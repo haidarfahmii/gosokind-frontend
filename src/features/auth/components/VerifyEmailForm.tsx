@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
 import { useVerifyForm } from "../hooks/useVerifyForm";
-import { Button } from "./ui/button"; // Asumsi path sesuai struktur kamu
+import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { FiLoader } from "react-icons/fi"; // Contoh icon loader
+import { FiLoader } from "react-icons/fi";
 
 interface VerifyEmailFormProps {
     token: string;
@@ -14,8 +14,7 @@ interface VerifyEmailFormProps {
 
 export default function VerifyEmailForm({ token }: VerifyEmailFormProps) {
     // Panggil hook dengan token
-    const { formik, isLoading, isVerifyingToken } = useVerifyForm(token);
-
+    const { formik, isLoading, isVerifyingToken, isTokenValid } = useVerifyForm(token);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -25,6 +24,17 @@ export default function VerifyEmailForm({ token }: VerifyEmailFormProps) {
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
                 <FiLoader className="animate-spin text-blue-600" size={40} />
                 <p className="text-gray-500">Memvalidasi token anda...</p>
+            </div>
+        );
+    }
+
+    if (!isTokenValid) {
+        return (
+            <div className="text-center py-10 text-red-500">
+                <p>Token tidak valid atau sudah kadaluarsa.</p>
+                <Button variant="link" onClick={() => window.location.href = '/auth/register'}>
+                    Kirim Ulang Link
+                </Button>
             </div>
         );
     }

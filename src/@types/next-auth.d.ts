@@ -1,5 +1,4 @@
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
-import { Role } from "./index"; 
 
 declare module "next-auth" {
   interface User extends DefaultUser {
@@ -8,7 +7,7 @@ declare module "next-auth" {
     email: string;
     role: string;
     accessToken: string;
-    avatarUrl?: string;
+    avatarUrl?: string | null;
   }
 
   interface Session {
@@ -17,7 +16,7 @@ declare module "next-auth" {
       role: string; // Tambahkan ini agar bisa diakses di client via useSession()
       accessToken: string;
       name: string;
-      avatarUrl?: string;
+      avatarUrl?: string | null;
     } & DefaultSession["user"];
   }
 }
@@ -29,6 +28,6 @@ declare module "next-auth/jwt" {
     email: string;
     accessToken: string;
     name: string;
-    avatarUrl?: string;
+    avatarUrl?: string | null;
   }
 }

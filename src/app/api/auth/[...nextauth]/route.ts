@@ -2,13 +2,15 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axiosInstance from "@/utils/axiosInstance";
 import { AuthResponse } from "@/@types";
+import { EmployeeLoginResponse as LoginResponse } from "@/@types/employee.types";
 import { AxiosError } from "axios";
 
 const nextAuthHandler = NextAuth({
   providers: [
     CredentialsProvider({
       // The name to display on the sign in form (e.g. "Sign in with...")
-      name: "Credentials",
+      id: "customer",
+      name: "Customer Login",
       // `credentials` is used to generate a form on the sign in page.
       // You can specify which fields should be submitted, by adding keys to the `credentials` object.
       // e.g. domain, username, password, 2FA token, etc.
@@ -38,7 +40,7 @@ const nextAuthHandler = NextAuth({
                   process.env.NEXT_AUTH_SECRET_KEY ||
                   "purwadhika-mini-project-evoria-jcwdbsd36",
               },
-            }
+            },
           );
 
           console.log("Login Response:", response.data);
@@ -77,7 +79,73 @@ const nextAuthHandler = NextAuth({
         }
       },
     }),
+
+    CredentialsProvider({
+      id: "employee",
+      name: "Employee Login",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, _) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        try {
+          // Call backend employee login endpoint
+          const response = await axiosInstance.post<LoginResponse>(
+            "/auth/employee/login",
+            {
+              email: credentials.email,
+              password: credentials.password,
+            },
+            {
+              headers: {
+                "next-auth-secret-key":
+                  process.env.NEXT_AUTH_SECRET_KEY ||
+                  "purwadhika-final-project-gosokind-jcwdbsd36",
+              },
+            },
+          );
+
+          console.log("Employee Login Response:", response.data);
+
+          const apiResponse = response.data;
+
+          // Validate response structure
+          if (!apiResponse.success || !apiResponse.data) {
+            console.error("Invalid response structure");
+            return null;
+          }
+
+          const { user, token } = apiResponse.data;
+
+          if (user && token) {
+            // Return user object that matches our NextAuth User interface
+            return {
+              id: user.id,
+              name: user.fullName,
+              email: user.email,
+              role: user.role,
+              accessToken: token,
+              avatarUrl: user.avatarUrl,
+            };
+          }
+
+          return null;
+        } catch (error: any) {
+          console.error("Employee Login Error:", error.response?.data);
+
+          const axiosError = error as AxiosError<{ message: string }>;
+          const errorMessage =
+            axiosError.response?.data?.message || "Something went wrong";
+
+          // Throw error agar bisa di-catch di frontend
+          throw new Error(errorMessage);
+        }
+      },
+    }),
   ],
+
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {

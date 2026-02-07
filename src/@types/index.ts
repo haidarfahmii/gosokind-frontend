@@ -3,9 +3,9 @@ export interface RegisterFormValues {
 }
 
 export interface VerifyFormValues {
-    fullName: string;
-    password: string;
-    token: string;
+  fullName: string;
+  password: string;
+  token: string;
 }
 
 export interface LoginFormValues {

@@ -17,10 +17,25 @@ interface UseOutletFormProps {
   initialData?: Outlet | null;
 }
 
+export type UseOutletFormReturn = {
+  formik: ReturnType<typeof useFormik<OutletFormValues>>;
+  locationPreview: CheckLocationResult | null;
+  isCheckingLocation: boolean;
+  showMapPreview: boolean;
+  handleCheckLocation: () => Promise<void>;
+  handleClearPreview: () => void;
+  handleAddressChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+  handleCoordinatesChange: (
+    field: "latitude" | "longitude",
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
 export const useOutletForm = ({
   onSuccess,
   initialData,
-}: UseOutletFormProps) => {
+}: UseOutletFormProps): UseOutletFormReturn => {
   // State untuk location preview
   const [locationPreview, setLocationPreview] =
     useState<CheckLocationResult | null>(null);

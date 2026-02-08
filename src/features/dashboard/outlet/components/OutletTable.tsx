@@ -179,13 +179,13 @@ export function OutletTable({
                         variant="outline"
                         className="text-[10px] font-mono w-fit justify-center"
                       >
-                        {outlet.latitude.toFixed(4)}
+                        lat:{outlet.latitude.toFixed(4)}
                       </Badge>
                       <Badge
                         variant="outline"
                         className="text-[10px] font-mono w-fit justify-center"
                       >
-                        {outlet.longitude.toFixed(4)}
+                        long:{outlet.longitude.toFixed(4)}
                       </Badge>
                     </div>
                   </TableCell>

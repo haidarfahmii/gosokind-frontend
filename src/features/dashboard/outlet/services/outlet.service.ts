@@ -1,8 +1,3 @@
-/**
- * Outlet Service
- * File: src/features/dashboard/outlet/services/outlet.service.ts
- */
-
 import axiosInstance from "@/utils/axiosInstance";
 import {
   CreateOutletInput,

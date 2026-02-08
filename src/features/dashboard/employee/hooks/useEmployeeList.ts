@@ -115,9 +115,8 @@ export const useEmployeeList = () => {
       page: pagination.page !== 1 ? String(pagination.page) : null,
       limit: pagination.limit !== 10 ? String(pagination.limit) : null,
     };
-    urlState.setParams(urlParams);
 
-    // Jalankan Fetch
+    urlState.setParams(urlParams);
     fetchEmployees();
 
     isInitialMount.current = false;

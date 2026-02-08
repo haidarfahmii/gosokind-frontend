@@ -57,7 +57,7 @@ export function EmployeeFilters({
 
       {/* Outlet Filter */}
       <Select value={selectedOutlet} onValueChange={onOutletChange}>
-        <SelectTrigger className="bg-white">
+        <SelectTrigger className="bg-white sm:w-32.5 w-full">
           <SelectValue placeholder="Filter by outlet" />
         </SelectTrigger>
         <SelectContent>
@@ -88,7 +88,7 @@ export function EmployeeFilters({
           value={itemsPerPage.toString()}
           onValueChange={(value) => onItemsPerPageChange(parseInt(value))}
         >
-          <SelectTrigger className="bg-white lg:w-32">
+          <SelectTrigger className="bg-white sm:w-32.5 w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

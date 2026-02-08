@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Employee, EmployeeRole } from "@/@types/employee.types";
 import { useEmployeeForm } from "../hooks/useEmployeeForm";
-import { EmployeeDialog } from "./EmployeeDialog";
 
 interface EmployeeFormProps {
   initialData?: Employee;
@@ -77,14 +76,7 @@ export function EmployeeForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">
-            Password{" "}
-            {isEditMode && (
-              <span className="text-xs text-slate-500">
-                (leave empty to keep current)
-              </span>
-            )}
-          </Label>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type="password"
@@ -101,6 +93,12 @@ export function EmployeeForm({
             <p className="text-red-500 text-xs">{formik.errors.password}</p>
           )}
         </div>
+
+        {isEditMode && (
+          <span className="text-xs text-slate-500">
+            (biarkan password kosong untuk tidak mengubah)
+          </span>
+        )}
       </div>
 
       {/* Role & Outlet */}

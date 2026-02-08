@@ -3,34 +3,30 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import axiosInstance from "@/utils/axiosInstance";
 import { AuthResponse } from "@/@types";
 import { AxiosError } from "axios";
+import GoogleProvider from "next-auth/providers/google";
 
 const nextAuthHandler = NextAuth({
   providers: [
+    // GoogleProvider di sini
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
-      // The name to display on the sign in form (e.g. "Sign in with...")
       name: "Credentials",
-      // `credentials` is used to generate a form on the sign in page.
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
-      // You can pass any HTML attribute to the <input> tag through the object.
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        // rememberMe: { label: "Remember Me", type: "text" },
       },
       async authorize(credentials, _) {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          // parse boolean dari string karena credentials selalu string
-          // const isRememberMe = credentials.rememberMe === "true";
-
           const response = await axiosInstance.post<AuthResponse>(
             "/auth/login",
             {
               email: credentials.email,
               password: credentials.password,
-              // rememberMe: isRememberMe,
             },
             {
               headers: {
@@ -43,10 +39,8 @@ const nextAuthHandler = NextAuth({
 
           console.log("Login Response:", response.data);
 
-          // PERBAIKAN: Akses nested data
           const apiResponse = response.data;
 
-          // Cek apakah response sukses
           if (!apiResponse.success || !apiResponse.data) {
             console.error("Invalid response structure");
             return null;
@@ -55,8 +49,6 @@ const nextAuthHandler = NextAuth({
           const { user, token } = apiResponse.data;
 
           if (user && token) {
-            // TypeScript tidak akan error di sini karena interface User
-            // di next-auth.d.ts sudah kamu tambahkan id, role, accessToken
             return {
               id: user.id,
               name: user.name,
@@ -79,21 +71,49 @@ const nextAuthHandler = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    // 3. Tambahkan callback signIn untuk handle logika Backend saat login Google
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          // Kirim data Google ke Backend Anda untuk didaftarkan/login
+          const response = await axiosInstance.post("/auth/google-login", {
+            email: user.email,
+            name: user.name,
+            googleId: user.id, // atau sub dari profile
+            avatarUrl: user.image
+          });
+
+          const apiResponse = response.data;
+
+          if (apiResponse.success && apiResponse.data) {
+            user.accessToken = apiResponse.data.token;
+            user.id = apiResponse.data.user.id;
+            user.role = apiResponse.data.user.role;
+            return true; // Izinkan login
+          }
+          return false; // Tolak login jika backend gagal
+        } catch (error) {
+          console.error("Social Login Error:", error);
+          return false;
+        }
+      }
+      return true; // Untuk CredentialsProvider, default true
+    },
+    async jwt({ token, user, trigger, session, account }) {
       if (user) {
         token.id = user?.id;
         token.email = user?.email;
         token.role = user?.role;
         token.name = user?.name;
-        token.accessToken = user?.accessToken;
-        token.avatarUrl = user?.avatarUrl;
+        token.avatarUrl = user.avatarUrl! || user.image!;
+
+        if (account?.provider === "google") {
+          token.accessToken = user.accessToken;
+        } else {
+          token.accessToken = user.accessToken;
+        }
       }
 
-      /**
-       * Handle trigger
-       * Saat session.update() dipanggil di client, trigger akan bernilai "update"
-       * dan session akan berisi data baru yang dikirim dari client
-       */
       if (trigger === "update" && session) {
         if (session.name !== undefined) {
           token.name = session.name;
@@ -105,7 +125,6 @@ const nextAuthHandler = NextAuth({
           console.log("Token avatarUrl updated:", token.avatarUrl);
         }
 
-        // update role & token
         if (session.role !== undefined) {
           token.role = session.role;
           console.log("Token role updated:", token.role);

@@ -15,10 +15,8 @@ export interface Outlet {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  _count?: {
-    employees: number;
-    orders: number;
-  };
+  employeeCount?: number;
+  orderCount?: number;
 }
 
 export interface OutletWithGeocoding extends Outlet {

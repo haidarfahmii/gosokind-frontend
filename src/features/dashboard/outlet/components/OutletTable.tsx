@@ -192,15 +192,15 @@ export function OutletTable({
 
                   {/* Stats (Employees & Orders Count) */}
                   <TableCell>
-                    {outlet._count ? (
+                    {outlet ? (
                       <div className="flex flex-col gap-1 items-center">
                         <div className="flex items-center gap-1 text-xs text-slate-600">
                           <Users className="w-3 h-3" />
-                          <span>Employee:{outlet._count.employees}</span>
+                          <span>Employee:{outlet.employeeCount}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-slate-600">
                           <ShoppingBag className="w-3 h-3" />
-                          <span>Order:{outlet._count.orders}</span>
+                          <span>Order:{outlet.orderCount}</span>
                         </div>
                       </div>
                     ) : (

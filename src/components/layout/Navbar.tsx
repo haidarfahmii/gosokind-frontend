@@ -64,15 +64,17 @@ export default function Navbar() {
                             <div className="flex items-center gap-4 animate-fadeIn">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
-                                        {session?.user?.avatarUrl ? (
-                                            <img
-                                                src={session.user.avatarUrl}
-                                                alt={session.user.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <FiUser className="text-slate-400" size={18} />
-                                        )}
+                                        <Link href={"/profile"}>
+                                            {session?.user?.avatarUrl ? (
+                                                <img
+                                                    src={session.user.avatarUrl}
+                                                    alt={session.user.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <FiUser className="text-slate-400" size={18} />
+                                            )}
+                                        </Link>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-sm font-semibold text-white">
@@ -80,7 +82,7 @@ export default function Navbar() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="h-6 w-[1px] bg-white/10"></div>
+                                <div className="h-6 w-px bg-white/10"></div>
                                 <button
                                     onClick={() => signOut({ callbackUrl: "/" })}
                                     className="text-slate-400 hover:text-red-400 transition-colors"
@@ -131,7 +133,7 @@ export default function Navbar() {
                             ))}
                         </div>
 
-                        <div className="h-[1px] bg-white/10 mb-4 mx-2"></div>
+                        <div className="h-px bg-white/10 mb-4 mx-2"></div>
 
                         {status === "authenticated" ? (
                             <div className="flex flex-col gap-3 p-2">

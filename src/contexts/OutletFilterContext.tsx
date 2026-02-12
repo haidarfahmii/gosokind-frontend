@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useEffect, ReactNode } from "react";
-import { outletService } from "@/features/dashboard/outlet/services/outlet.service";
+import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
 import { toast } from "react-toastify";
 
 interface Outlet {

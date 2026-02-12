@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useOutletList } from "@/features/dashboard/outlet/hooks/useOutletList";
-import { OutletTable } from "@/features/dashboard/outlet/components/OutletTable";
-import { OutletDialog } from "@/features/dashboard/outlet/components/OutletDialog";
-import { Outlet } from "@/features/dashboard/outlet/types";
+import { useOutletList } from "@/features/super-admin/outlet/hooks/useOutletList";
+import { OutletTable } from "@/features/super-admin/outlet/components/OutletTable";
+import { OutletDialog } from "@/features/super-admin/outlet/components/OutletDialog";
+import { Outlet } from "@/features/super-admin/outlet/types";
 
 export default function OutletManagementPage() {
   const {

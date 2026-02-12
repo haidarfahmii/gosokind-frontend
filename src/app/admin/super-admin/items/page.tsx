@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { laundryItemService } from "@/features/dashboard/laundry-item/services/laundry-item.service";
-import { LaundryItem } from "@/features/dashboard/laundry-item/types";
-import { LaundryItemTable } from "@/features/dashboard/laundry-item/components/LaundryItemTable";
-import { LaundryItemForm } from "@/features/dashboard/laundry-item/components/LaundryItemForm";
+import { laundryItemService } from "@/features/super-admin/laundry-item/services/laundry-item.service";
+import { LaundryItem } from "@/features/super-admin/laundry-item/types";
+import { LaundryItemTable } from "@/features/super-admin/laundry-item/components/LaundryItemTable";
+import { LaundryItemForm } from "@/features/super-admin/laundry-item/components/LaundryItemForm";
 import Pagination from "@/components/shared/Pagination";
 
 export default function LaundryItemsPage() {

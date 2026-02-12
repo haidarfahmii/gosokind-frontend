@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { PageHeader } from "@/features/dashboard/employee/components/PageHeader";
-import { SearchBar } from "@/features/dashboard/employee/components/SearchBar";
-import { EmployeeFilters } from "@/features/dashboard/employee/components/EmployeeFilters";
-import { EmployeeTable } from "@/features/dashboard/employee/components/EmployeeTable";
-import { EmployeeDialog } from "@/features/dashboard/employee/components/EmployeeDialog";
-import { useEmployeeList } from "@/features/dashboard/employee/hooks/useEmployeeList";
+import { PageHeader } from "@/features/super-admin/employee/components/PageHeader";
+import { SearchBar } from "@/features/super-admin/employee/components/SearchBar";
+import { EmployeeFilters } from "@/features/super-admin/employee/components/EmployeeFilters";
+import { EmployeeTable } from "@/features/super-admin/employee/components/EmployeeTable";
+import { EmployeeDialog } from "@/features/super-admin/employee/components/EmployeeDialog";
+import { useEmployeeList } from "@/features/super-admin/employee/hooks/useEmployeeList";
 import { useOutletFilter } from "@/hooks/useOutletFilter";
 import { Employee } from "@/@types/employee.types";
 

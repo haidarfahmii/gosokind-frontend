@@ -90,14 +90,14 @@ export const SIDEBAR_ITEMS: {
           icon: LayoutDashboard,
         },
         {
+          label: "Employees",
+          href: "/admin/outlet-admin/employees",
+          icon: UserCog,
+        },
+        {
           label: "Orders",
           href: "/admin/outlet-admin/orders",
           icon: Package,
-        },
-        {
-          label: "Staff",
-          href: "/admin/outlet-admin/staff",
-          icon: UserCog,
         },
       ],
     },

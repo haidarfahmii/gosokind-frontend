@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
 import { Employee, EmployeeRole } from "@/@types/employee.types";
-import { employeeService } from "../services/employee.service";
+import { employeeService } from "@/services/employee.service";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUrlState } from "@/hooks/useUrlState";
 

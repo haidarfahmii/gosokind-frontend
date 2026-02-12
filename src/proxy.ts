@@ -8,7 +8,7 @@ export default withAuth(
 
     console.log("🔐 Middleware - Path:", path, "Role:", token?.role);
 
-    if (path === "/login" && token) {
+    if (path === "/auth/login" && token) {
       if (token.role === "SUPER_ADMIN") {
         console.log("✅ Redirecting Super Admin to dashboard");
         return NextResponse.redirect(
@@ -32,7 +32,7 @@ export default withAuth(
           );
         }
         // For other roles, redirect to login
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/auth/login", req.url));
       }
     }
 
@@ -45,7 +45,7 @@ export default withAuth(
           );
         }
         // For other roles, redirect to login
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/auth/login", req.url));
       }
     }
 

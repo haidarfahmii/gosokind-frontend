@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { employeeService } from "../services/employee.service";
+import { employeeService } from "@/services/employee.service";
 import {
   OutletEmployee,
   CreateEmployeeDto,
@@ -27,9 +27,6 @@ export function useEmployees() {
     totalPages: 0,
   });
 
-  /**
-   * Fetch employees with filters
-   */
   const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
@@ -40,10 +37,21 @@ export function useEmployees() {
         status: filters.status === "all" ? undefined : filters.status,
       };
 
-      const response = await employeeService.getAll(filterParams);
+      const response = await employeeService.getAllEmployees({
+        page: filterParams.page,
+        limit: filterParams.limit,
+        search: filterParams.search,
+        role: filterParams.role,
+        isActive:
+          filterParams.status === "active"
+            ? true
+            : filterParams.status === "inactive"
+              ? false
+              : undefined,
+      });
 
       if (response.success) {
-        setEmployees(response.data);
+        setEmployees(response.data as OutletEmployee[]);
         if (response.pagination) {
           setPagination(response.pagination);
         }
@@ -56,32 +64,23 @@ export function useEmployees() {
     }
   }, [filters]);
 
-  /**
-   * Fetch employee statistics
-   */
   const fetchStats = useCallback(async () => {
     try {
-      const statsData = await employeeService.getStats();
+      const statsData = await employeeService.getEmployeeStats();
       setStats(statsData);
     } catch (error: any) {
       console.error("Failed to fetch stats:", error);
     }
   }, []);
 
-  /**
-   * Initial load
-   */
   useEffect(() => {
     fetchEmployees();
     fetchStats();
   }, [fetchEmployees, fetchStats]);
 
-  /**
-   * Create new employee
-   */
   const createEmployee = async (data: CreateEmployeeDto) => {
     try {
-      const response = await employeeService.create(data);
+      const response = await employeeService.createEmployee(data);
 
       if (response.success) {
         toast.success("Employee created successfully");
@@ -95,12 +94,9 @@ export function useEmployees() {
     }
   };
 
-  /**
-   * Update employee
-   */
   const updateEmployee = async (id: string, data: UpdateEmployeeDto) => {
     try {
-      const response = await employeeService.update(id, data);
+      const response = await employeeService.updateEmployee(id, data);
 
       if (response.success) {
         toast.success("Employee updated successfully");
@@ -114,16 +110,13 @@ export function useEmployees() {
     }
   };
 
-  /**
-   * Delete employee
-   */
   const deleteEmployee = async (id: string) => {
     if (!confirm("Are you sure you want to delete this employee?")) {
       return;
     }
 
     try {
-      const response = await employeeService.delete(id);
+      const response = await employeeService.deleteEmployee(id);
 
       if (response.success) {
         toast.success("Employee deleted successfully");
@@ -135,14 +128,18 @@ export function useEmployees() {
     }
   };
 
-  /**
-   * Toggle employee status
-   */
-  const toggleStatus = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-
+  const toggleStatus = async (id: string) => {
     try {
-      const response = await employeeService.toggleStatus(id, newStatus);
+      // cari employee dari state untuk menadapatkan status saat ini
+      const employee = employees.find((e) => e.id === id);
+      if (!employee) return;
+      // hitung status baru
+      const newStatus = !employee.isActive;
+
+      const response = await employeeService.toggleEmployeeStatus(
+        id,
+        newStatus,
+      );
 
       if (response.success) {
         toast.success(`Employee status changed to ${newStatus}`);
@@ -154,30 +151,18 @@ export function useEmployees() {
     }
   };
 
-  /**
-   * Update filters
-   */
   const updateFilters = (newFilters: Partial<EmployeeFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
   };
 
-  /**
-   * Change page
-   */
   const changePage = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
   };
 
-  /**
-   * Change limit
-   */
   const changeLimit = (limit: number) => {
     setFilters((prev) => ({ ...prev, limit, page: 1 }));
   };
 
-  /**
-   * Clear filters
-   */
   const clearFilters = () => {
     setFilters({
       search: "",
@@ -188,23 +173,17 @@ export function useEmployees() {
     });
   };
 
-  /**
-   * Refresh data
-   */
   const refresh = () => {
     fetchEmployees();
     fetchStats();
   };
 
   return {
-    // Data
     employees,
     loading,
     stats,
     filters,
     pagination,
-
-    // Actions
     createEmployee,
     updateEmployee,
     deleteEmployee,

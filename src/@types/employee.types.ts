@@ -7,6 +7,11 @@ export enum EmployeeRole {
   DRIVER = "DRIVER",
 }
 
+export enum EmployeeStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
 export interface Employee {
   id: string;
   fullName: string;
@@ -46,7 +51,7 @@ export interface UpdateEmployeeInput {
 export interface EmployeeListQuery {
   page?: number;
   limit?: number;
-  role?: EmployeeRole;
+  role?: EmployeeRole | string;
   outletId?: string;
   search?: string;
   isActive?: boolean;
@@ -81,6 +86,15 @@ export interface EmployeeLoginResponse {
       fullName: string;
       role: EmployeeRole;
       avatarUrl?: string;
+      outletId?: string;
+      outletName?: string;
     };
   };
+}
+
+export interface EmployeeStats {
+  total: number;
+  active: number;
+  inactive: number;
+  byRole: Record<string, number>;
 }

@@ -32,7 +32,7 @@ interface EmployeeTableProps {
   };
   onEdit: (employee: OutletEmployee) => void;
   onDelete: (id: string) => void;
-  onToggleStatus: (id: string, currentStatus: string) => void;
+  onToggleStatus: (id: string) => void;
   onPageChange: (page: number) => void;
 }
 
@@ -65,6 +65,12 @@ export function EmployeeTable({
     return labels[role] || role;
   };
 
+  const getStatusFromIsActive = (isActive: boolean | undefined): string => {
+    if (isActive === true) return "ACTIVE";
+    if (isActive === false) return "INACTIVE";
+    return "UNKNOWN";
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -95,88 +101,95 @@ export function EmployeeTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {employees.map((employee) => (
-            <TableRow key={employee.id}>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {employee.avatarUrl ? (
-                    <img
-                      src={employee.avatarUrl}
-                      alt={employee.fullName}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold text-sm">
-                        {employee.fullName.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-medium text-slate-800">
-                    {employee.fullName}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-slate-600">{employee.email}</TableCell>
-              <TableCell className="text-slate-600">
-                {employee.phoneNumber || "-"}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant="secondary"
-                  className={`${getRoleBadge(employee.role)} border-none`}
-                >
-                  {getRoleLabel(employee.role)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant="secondary"
-                  className={
-                    employee.status === "ACTIVE"
-                      ? "bg-green-100 text-green-700 border-none"
-                      : "bg-red-100 text-red-700 border-none"
-                  }
-                >
-                  {employee.status}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-slate-400 hover:text-slate-600"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(employee)}>
-                      <Edit2 className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        onToggleStatus(employee.id, employee.status)
-                      }
-                    >
-                      {employee.status === "ACTIVE" ? "Deactivate" : "Activate"}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(employee.id)}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          {employees.map((employee) => {
+            return (
+              <TableRow key={employee.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    {employee.avatarUrl ? (
+                      <img
+                        src={employee.avatarUrl}
+                        alt={employee.fullName}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold text-sm">
+                          {employee.fullName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <span className="font-medium text-slate-800">
+                      {employee.fullName}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-slate-600">
+                  {employee.email}
+                </TableCell>
+                <TableCell className="text-slate-600">
+                  {employee.phoneNumber || "-"}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={`${getRoleBadge(employee.role)} border-none`}
+                  >
+                    {getRoleLabel(employee.role)}
+                  </Badge>
+                </TableCell>
+
+                {/*Status Badge */}
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      employee.isActive
+                        ? "bg-green-100 text-green-700 border-none"
+                        : "bg-red-100 text-red-700 border-none"
+                    }
+                  >
+                    {employee.isActive ? "ACTIVE" : "INACTIVE"}
+                  </Badge>
+                </TableCell>
+
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(employee)}>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => onToggleStatus(employee.id)}
+                      >
+                        {employee.isActive ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onDelete(employee.id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
 

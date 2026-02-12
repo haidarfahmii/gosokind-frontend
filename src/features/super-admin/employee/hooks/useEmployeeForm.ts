@@ -6,7 +6,7 @@ import {
   employeeValidationSchema,
   EmployeeFormValues,
 } from "../schemas/employeeValidationSchema";
-import { employeeService } from "../services/employee.service";
+import { employeeService } from "@/services/employee.service";
 import { Employee, EmployeeRole } from "@/@types/employee.types";
 
 interface UseEmployeeFormProps {

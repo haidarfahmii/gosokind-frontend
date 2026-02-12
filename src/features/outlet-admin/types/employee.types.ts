@@ -1,31 +1,13 @@
-export interface OutletEmployee {
-  id: string;
-  fullName: string;
-  email: string;
-  role: EmployeeRole;
+export * from "@/@types/employee.types";
+import { Employee, EmployeeRole } from "@/@types/employee.types";
+
+export interface OutletEmployee extends Employee {
   phoneNumber?: string | null;
-  status: EmployeeStatus;
-  avatarUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
   outletId: string;
   outlet?: {
     id: string;
     name: string;
   };
-}
-
-export enum EmployeeRole {
-  OUTLET_ADMIN = "OUTLET_ADMIN",
-  WORKER_WASHING = "WORKER_WASHING",
-  WORKER_IRONING = "WORKER_IRONING",
-  WORKER_PACKING = "WORKER_PACKING",
-  DRIVER = "DRIVER",
-}
-
-export enum EmployeeStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
 }
 
 export interface CreateEmployeeDto {
@@ -41,7 +23,7 @@ export interface UpdateEmployeeDto {
   email?: string;
   role?: EmployeeRole;
   phoneNumber?: string;
-  status?: EmployeeStatus;
+  isActive?: boolean;
 }
 
 export interface EmployeeFilters {
@@ -50,15 +32,6 @@ export interface EmployeeFilters {
   status?: string;
   page?: number;
   limit?: number;
-}
-
-export interface EmployeeStats {
-  total: number;
-  active: number;
-  inactive: number;
-  byRole: {
-    [key in EmployeeRole]?: number;
-  };
 }
 
 export interface EmployeesResponse {
@@ -72,7 +45,8 @@ export interface EmployeesResponse {
   };
 }
 
-export interface EmployeeResponse {
+export interface OutletEmployeeResponse {
   success: boolean;
   data: OutletEmployee;
+  message?: string;
 }

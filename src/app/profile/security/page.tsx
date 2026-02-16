@@ -1,17 +1,14 @@
 "use client";
 
-import { useSession } from "next-auth/react"; // 1. Import useSession
+import { useSession } from "next-auth/react"; 
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiSave } from "react-icons/fi";
-import { Button } from "@/features/auth/components/ui/button";
-import { Input } from "@/features/auth/components/ui/input";
-import { Label } from "@/features/auth/components/ui/label";
+import { FiArrowLeft} from "react-icons/fi";
 import MobileNav from "@/components/layout/MobileNav";
 import ChangePasswordForm from "@/features/profile/components/ChangePasswordForm";
 
 export default function SecurityPage() {
     const router = useRouter();
-    const { data: session } = useSession(); // 2. Ambil data session
+    const { data: session } = useSession();
 
     // Helper untuk inisial nama (misal "Rafa" -> "R")
     const userInitial = session?.user?.name

@@ -42,7 +42,7 @@ export default function ProfilePage() {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <User className="h-12 w-12 text-slate-400"/>
+                                <User className="h-12 w-12 text-slate-400" />
                             )}
                         </div>
 
@@ -65,7 +65,6 @@ export default function ProfilePage() {
                             <ProfileMenuItem
                                 icon={<FiUser size={20} />}
                                 label="Informasi Dasar"
-                            // onClick={() => router.push("/profile/account")}
                             />
                         </Link>
                         <div className="h-px bg-slate-100 mx-4" /> {/* Divider */}
@@ -75,11 +74,12 @@ export default function ProfilePage() {
                             onClick={() => router.push("/profile/security")}
                         />
                         <div className="h-px bg-slate-100 mx-4" /> {/* Divider */}
-                        <ProfileMenuItem
-                            icon={<FiMapPin size={20} className="text-green-600" />}
-                            label="Alamat Tersimpan"
-                            onClick={() => console.log("Alamat")}
-                        />
+                        <Link href={"/profile/address"}>
+                            <ProfileMenuItem
+                                icon={<FiMapPin size={20} className="text-green-600" />}
+                                label="Alamat Tersimpan"
+                            />
+                        </Link>
                         <div className="h-px bg-slate-100 mx-4" />
                         <ProfileMenuItem
                             icon={<FiCreditCard size={20} className="text-orange-500" />}

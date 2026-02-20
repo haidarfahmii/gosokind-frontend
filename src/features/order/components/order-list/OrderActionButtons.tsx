@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, ShieldAlert } from "lucide-react";
-import { Order, OrderStatus, BypassRequest } from "../../types/order.types";
+import {
+  Order,
+  OrderStatus,
+  BypassRequest,
+  BypassStatus,
+} from "@/features/order/types/order.types";
 
 interface OrderActionButtonsProps {
   order: Order;
@@ -20,7 +25,10 @@ export function OrderActionButtons({
   onViewOrderBypass,
 }: OrderActionButtonsProps) {
   const needsInputDetails = order.status === OrderStatus.ARRIVED_AT_OUTLET;
-  const hasPendingBypass = orderBypassRequests.length > 0;
+  const pendingBypassRequests = orderBypassRequests.filter(
+    (br) => br.status === BypassStatus.PENDING,
+  );
+  const hasPendingBypass = pendingBypassRequests.length > 0;
 
   return (
     <div className="flex items-center justify-end gap-2">
@@ -28,14 +36,14 @@ export function OrderActionButtons({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => onViewOrderBypass(order, orderBypassRequests)}
+          onClick={() => onViewOrderBypass(order, pendingBypassRequests)}
           className="gap-2 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400 relative"
         >
           <ShieldAlert className="w-3 h-3" />
           Bypass
           {/* Badge jumlah request */}
           <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white leading-none">
-            {orderBypassRequests.length}
+            {pendingBypassRequests.length}
           </span>
         </Button>
       )}

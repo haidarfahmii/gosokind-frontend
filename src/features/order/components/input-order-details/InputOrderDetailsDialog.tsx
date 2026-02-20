@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package } from "lucide-react";
-import { Order } from "../types/order.types";
-import { useInputOrderDetailsForm } from "../hooks/useInputOrderDetailsForm";
+import { Order } from "../../types/order.types";
+import { useInputOrderDetailsForm } from "../../hooks/useInputOrderDetailsForm";
 import {
   TotalWeightField,
   LaundryItemsList,
   EstimatedPriceCard,
-} from "./input-order-details";
-import { WorkerSelectField } from "./input-order-details/WorkerSelectField";
+} from "./index";
+import { WorkerSelectField } from "./WorkerSelectField";
 
 interface InputOrderDetailsDialogProps {
   open: boolean;

@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
-import { BypassRequest } from "../types/order.types";
+import { BypassRequest } from "../../types/order.types";
 import Pagination from "@/components/shared/Pagination";
-import { useBypassRequestReview } from "../hooks/useBypassRequestReview";
-import { BypassRequestCard } from "./bypass-request/BypassRequestCard";
+import { useBypassRequestReview } from "../../hooks/useBypassRequestReview";
+import { BypassRequestCard } from "./BypassRequestCard";
 
 interface BypassRequestDialogProps {
   open: boolean;

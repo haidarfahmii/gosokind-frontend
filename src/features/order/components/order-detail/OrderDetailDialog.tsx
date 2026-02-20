@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -7,14 +8,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Package } from "lucide-react";
-import { Order, getStatusConfig } from "../types/order.types";
+import { Button } from "@/components/ui/button";
+import { Package, ExternalLink } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Order, getStatusConfig } from "@/features/order/types/order.types";
 import {
   CustomerInfoCard,
   OrderSummaryCard,
   LaundryItemsCard,
   StationProcessTimeline,
-} from "./order-detail";
+} from "@/features/order/components/order-detail";
 
 interface OrderDetailDialogProps {
   open: boolean;
@@ -27,9 +30,19 @@ export function OrderDetailDialog({
   onOpenChange,
   order,
 }: OrderDetailDialogProps) {
+  const { data: session } = useSession();
+
   if (!order) return null;
 
   const statusConfig = getStatusConfig(order.status);
+
+  const role = session?.user?.role;
+  const detailPageHref =
+    role === "SUPER_ADMIN"
+      ? `/admin/super-admin/orders/${order.id}`
+      : role === "OUTLET_ADMIN"
+        ? `/admin/outlet-admin/orders/${order.id}`
+        : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,6 +77,21 @@ export function OrderDetailDialog({
           {/* Processing Timeline */}
           <StationProcessTimeline order={order} />
         </div>
+
+        {detailPageHref && (
+          <div className="pt-4 border-t flex justify-end">
+            <Link href={detailPageHref} onClick={() => onOpenChange(false)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-slate-500"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Full Details Page
+              </Button>
+            </Link>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

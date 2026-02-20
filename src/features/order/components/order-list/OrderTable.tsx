@@ -8,13 +8,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Pagination from "@/components/shared/Pagination";
-import { BypassRequest, Order } from "../types/order.types";
-import { useExpandedRows } from "../hooks/useExpandedRows";
-import {
-  OrderTableLoadingState,
-  OrderTableEmptyState,
-  OrderTableRow,
-} from "./order-table";
+import { BypassRequest, Order } from "../../types/order.types";
+import { useExpandedRows } from "../../hooks/useExpandedRows";
+import { OrderTableLoadingState, OrderTableEmptyState, OrderTableRow } from ".";
 
 interface PaginationMeta {
   total: number;

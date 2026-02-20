@@ -1,8 +1,4 @@
-// Export all order components
-export { OrderPageHeader } from "./OrderPageHeader";
-export { SearchBar } from "./SearchBar";
-export { OrderFilters } from "./OrderFilters";
-export { OrderTable } from "./OrderTable";
-export { OrderDetailDialog } from "./OrderDetailDialog";
-export { InputOrderDetailsDialog } from "./InputOrderDetailsDialog";
-export { BypassRequestDialog } from "./BypassRequestDialog";
+export * from "./bypass-request";
+export * from "./input-order-details";
+export * from "./order-detail";
+export * from "./order-list";

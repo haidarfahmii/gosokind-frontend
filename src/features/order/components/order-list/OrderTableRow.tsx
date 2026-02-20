@@ -10,9 +10,7 @@ import {
 import { format } from "date-fns";
 import { BypassRequest, Order } from "../../types/order.types";
 import { formatCurrency } from "@/utils/formatters";
-import { OrderStatusBadge } from "./OrderStatusBadge";
-import { OrderActionButtons } from "./OrderActionButtons";
-import { OrderItemsPreview } from "./OrderItemsPreview";
+import { OrderStatusBadge, OrderActionButtons, OrderItemsPreview } from ".";
 
 interface OrderTableRowProps {
   order: Order;

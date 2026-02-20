@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { BypassRequest, Order } from "../types/order.types";
-import { useOrderList } from "./useOrderList";
-import { useBypassRequests } from "./useBypassRequests";
+import { BypassRequest, Order } from "@/features/order/types/order.types";
+import { useOrderList, useBypassRequests } from "@/features/order/hooks";
 
 export function useOrderPage() {
   const { data: session } = useSession();

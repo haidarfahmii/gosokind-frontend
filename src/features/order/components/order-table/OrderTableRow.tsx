@@ -8,7 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
-import { Order } from "../../types/order.types";
+import { BypassRequest, Order } from "../../types/order.types";
 import { formatCurrency } from "@/utils/formatters";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { OrderActionButtons } from "./OrderActionButtons";
@@ -21,6 +21,8 @@ interface OrderTableRowProps {
   onViewDetail: (order: Order) => void;
   onInputDetails: (order: Order) => void;
   canInputDetails: boolean;
+  orderBypassRequests: BypassRequest[];
+  onViewOrderBypass: (order: Order, requests: BypassRequest[]) => void;
 }
 
 export function OrderTableRow({
@@ -30,6 +32,8 @@ export function OrderTableRow({
   onViewDetail,
   onInputDetails,
   canInputDetails,
+  orderBypassRequests,
+  onViewOrderBypass,
 }: OrderTableRowProps) {
   return (
     <>
@@ -113,6 +117,8 @@ export function OrderTableRow({
             canInputDetails={canInputDetails}
             onViewDetail={onViewDetail}
             onInputDetails={onInputDetails}
+            orderBypassRequests={orderBypassRequests}
+            onViewOrderBypass={onViewOrderBypass}
           />
         </TableCell>
       </TableRow>

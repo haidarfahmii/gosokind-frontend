@@ -64,6 +64,7 @@ export default function OrderPage() {
 
     // Bypass
     bypassRequests,
+    selectedBypassRequests,
     loadingBypass,
     bypassPagination,
     handleBypassPageChange,
@@ -82,6 +83,7 @@ export default function OrderPage() {
     handleInputDetails,
     handleInputSuccess,
     handleViewBypassRequests,
+    handleViewOrderBypass,
     handleBypassAction,
 
     // Loader
@@ -154,6 +156,8 @@ export default function OrderPage() {
             pagination={pagination}
             onPageChange={handlePageChange}
             canInputDetails={true}
+            bypassRequests={bypassRequests}
+            onViewOrderBypass={handleViewOrderBypass}
           />
         </CardContent>
       </Card>
@@ -174,7 +178,7 @@ export default function OrderPage() {
       <BypassRequestDialog
         open={isBypassDialogOpen}
         onOpenChange={setIsBypassDialogOpen}
-        bypassRequests={bypassRequests}
+        bypassRequests={selectedBypassRequests}
         loading={loadingBypass}
         pagination={{
           page: bypassPagination.page,

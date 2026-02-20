@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Order } from "../types/order.types";
+import { BypassRequest, Order } from "../types/order.types";
 import { useOrderList } from "./useOrderList";
 import { useBypassRequests } from "./useBypassRequests";
 
@@ -15,6 +15,10 @@ export function useOrderPage() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState<boolean>(false);
   const [isInputDialogOpen, setIsInputDialogOpen] = useState<boolean>(false);
   const [isBypassDialogOpen, setIsBypassDialogOpen] = useState<boolean>(false);
+
+  const [selectedBypassRequests, setSelectedBypassRequests] = useState<
+    BypassRequest[]
+  >([]);
 
   // Outlets for Super Admin filter
   const [outlets, setOutlets] = useState<Array<{ id: string; name: string }>>(
@@ -95,7 +99,16 @@ export function useOrderPage() {
   };
 
   // Bypass handlers
-  const handleViewBypassRequests = () => setIsBypassDialogOpen(true);
+  const handleViewBypassRequests = () => {
+    setSelectedBypassRequests(bypassRequests);
+    setIsBypassDialogOpen(true);
+  };
+
+  const handleViewOrderBypass = (order: Order, requests: BypassRequest[]) => {
+    setSelectedOrder(order);
+    setSelectedBypassRequests(requests); // hanya bypass milik order ini
+    setIsBypassDialogOpen(true);
+  };
 
   const handleBypassAction = async (
     action: "APPROVED" | "REJECTED",
@@ -104,6 +117,7 @@ export function useOrderPage() {
   ) => {
     await handleBypassRequest(id, action, note);
     refetchOrders();
+    setSelectedBypassRequests((prev) => prev.filter((br) => br.id !== id));
   };
 
   // Derived state
@@ -142,6 +156,7 @@ export function useOrderPage() {
 
     // Bypass
     bypassRequests,
+    selectedBypassRequests,
     loadingBypass,
     bypassPagination,
     handleBypassPageChange,
@@ -160,6 +175,7 @@ export function useOrderPage() {
     handleInputDetails,
     handleInputSuccess,
     handleViewBypassRequests,
+    handleViewOrderBypass,
     handleBypassAction,
 
     // Loader

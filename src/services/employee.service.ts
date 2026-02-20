@@ -100,9 +100,19 @@ export const deleteEmployee = async (
 export const getEmployeeStats = async (): Promise<EmployeeStats> => {
   try {
     const response = await axiosInstance.get("/employees/stats");
-    return response.data;
+
+    const stats: EmployeeStats = response.data.data;
+
+    if (!stats || typeof stats.total !== "number") {
+      throw new Error("Invalid stats response");
+    }
+
+    return stats;
   } catch (error: any) {
-    console.warn("Stats endpoint not available, calculating manually");
+    console.warn(
+      "Stats endpoint failed, calculating from employee list:",
+      error?.message,
+    );
     const employees = await getAllEmployees();
     return calculateEmployeeStats(employees.data);
   }

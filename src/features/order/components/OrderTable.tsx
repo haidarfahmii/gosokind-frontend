@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Pagination from "@/components/shared/Pagination";
-import { Order } from "../types/order.types";
+import { BypassRequest, Order } from "../types/order.types";
 import { useExpandedRows } from "../hooks/useExpandedRows";
 import {
   OrderTableLoadingState,
@@ -32,6 +32,8 @@ interface OrderTableProps {
   onPageChange: (page: number) => void;
   /** Permission untuk input details — khusus Outlet Admin */
   canInputDetails?: boolean;
+  bypassRequests?: BypassRequest[];
+  onViewOrderBypass?: (order: Order, requests: BypassRequest[]) => void;
 }
 
 export function OrderTable({
@@ -42,11 +44,16 @@ export function OrderTable({
   pagination,
   onPageChange,
   canInputDetails = true,
+  bypassRequests = [],
+  onViewOrderBypass = () => {},
 }: OrderTableProps) {
   const { isExpanded, toggleRow } = useExpandedRows();
 
   if (isLoading) return <OrderTableLoadingState />;
   if (data.length === 0) return <OrderTableEmptyState />;
+
+  const getBypassRequestsForOrder = (orderId: string): BypassRequest[] =>
+    bypassRequests.filter((br) => br.order.id === orderId);
 
   return (
     <div className="space-y-4">
@@ -76,6 +83,8 @@ export function OrderTable({
                 onViewDetail={onViewDetail}
                 onInputDetails={onInputDetails}
                 canInputDetails={canInputDetails}
+                orderBypassRequests={getBypassRequestsForOrder(order.id)}
+                onViewOrderBypass={onViewOrderBypass}
               />
             ))}
           </TableBody>

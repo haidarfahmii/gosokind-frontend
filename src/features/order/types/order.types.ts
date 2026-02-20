@@ -181,6 +181,7 @@ export interface BypassRequestListResponse {
 // Input Types for Order Operations
 export interface InputOrderDetailsInput {
   totalWeight: number;
+  workerId: string;
   items: Array<{
     laundryItemId: string;
     quantity: number;

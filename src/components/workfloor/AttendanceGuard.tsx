@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getAttendanceStatus } from '@/services/attendance.service';
+import { getDashboard } from '@/services/attendance.service';
 
 export default function AttendanceGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function AttendanceGuard({ children }: { children: React.ReactNod
 
   const checkStatus = async () => {
     try {
-      const status = await getAttendanceStatus();
+      const status = await getDashboard();
       setIsClockedIn(status.isClockedIn);
     } catch (error) {
       console.error('Failed to check attendance', error);

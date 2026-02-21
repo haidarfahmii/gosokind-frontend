@@ -45,7 +45,4 @@ export const getHistory = async (): Promise<AttendanceRecord[]> => {
   return data.data.map(mapToRecord);
 };
 
-export const getAttendanceStatus = async (): Promise<{ isClockedIn: boolean; clockInTime?: string | null }> => {
-  const { data } = await api.get<{ data: { isClockedIn: boolean, clockInTime?: string | null } }>(`${ATTENDANCE_ENDPOINT}/status`);
-  return data.data;
-};
+// Removed getAttendanceStatus as /status endpoint does not exist on backend and getDashboard handles this.

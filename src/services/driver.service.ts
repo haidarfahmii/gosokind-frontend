@@ -9,21 +9,22 @@ const mapDtoToJob = (dto: DriverJobDTO): DriverJob => ({
   orderId: dto.orderNumber,
   type: dto.type,
   status: dto.status,
-  customerName: dto.customer.fullName,
-  address: dto.address.address,
-  itemCount: dto.orderItems.reduce((acc, item) => acc + item.quantity, 0),
-  date: new Date(dto.createdAt).toLocaleDateString(),
+  customerName: dto.customer?.fullName || 'Unknown Customer',
+  address: dto.address?.address || 'No Address Provided',
+  itemCount: dto.orderItems?.reduce((acc, item) => acc + item.quantity, 0) || 0,
+  date: new Date(dto.createdAt || new Date()).toLocaleDateString(),
 });
 
 // --- Services ---
 export const getAvailableJobs = async (): Promise<DriverJob[]> => {
-  const { data } = await api.get<{ data: DriverJobDTO[] }>(`${JOB_ENDPOINT}/available`);
+  const { data } = await api.get<{ success: boolean; data: DriverJobDTO[] }>(`${JOB_ENDPOINT}/available`);
   return data.data.map(mapDtoToJob);
 };
 
 export const getActiveJob = async (): Promise<DriverJob | null> => {
   try {
-    const { data } = await api.get<{ data: DriverJobDTO }>(`${JOB_ENDPOINT}/active`);
+    const { data } = await api.get<{ success: boolean; data: DriverJobDTO | null }>(`${JOB_ENDPOINT}/active`);
+    if (!data.data) return null;
     return mapDtoToJob(data.data);
   } catch (error: any) {
     return error.response?.status === 404 ? null : Promise.reject(error);

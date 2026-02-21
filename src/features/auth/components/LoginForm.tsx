@@ -6,6 +6,8 @@ import { useLoginForm } from "../hooks/useLoginForm";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { signIn } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function LoginForm() {
   const {
@@ -153,16 +155,24 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      {/* Additional Info for Employee Login */}
-      {loginType === "employee" && (
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-xs text-amber-800">
-            <span className="font-semibold">⚠️ Employee Access Only:</span> This
-            login is for Gosokind staff members only. If you're a customer,
-            please switch to Customer login above.
-          </p>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
         </div>
-      )}
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      <Button
+        variant="outline" // Pastikan Button support variant ini atau sesuaikan style
+        type="button"
+        className="w-full"
+        onClick={() => signIn("google", { callbackUrl: "/" })}
+      >
+        <FcGoogle className="mr-2 h-4 w-4" />
+        Google
+      </Button>
     </div>
   );
 }

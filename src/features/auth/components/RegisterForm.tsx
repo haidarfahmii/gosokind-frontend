@@ -1,14 +1,17 @@
 "use client";
 
 import { useRegisterForm } from "../hooks/useRegisterForm";
-import { Button } from "@/features/auth/components/ui/button"; // Asumsi pakai Shadcn/UI
+import { Button } from "@/features/auth/components/ui/button";
 import { Input } from "@/features/auth/components/ui/input";
 import { Label } from "@/features/auth/components/ui/label";
 import { Checkbox } from "./ui/checkbox";
+import { FcGoogle } from "react-icons/fc";
+import { signIn } from "next-auth/react";
 
 export default function RegisterForm() {
   const { formik, isLoading } = useRegisterForm();
   const termsError = formik.submitCount > 0 ? formik.errors.acceptTerms : null;
+
   return (
     <div className="grid gap-6">
       <form onSubmit={formik.handleSubmit}>
@@ -58,11 +61,33 @@ export default function RegisterForm() {
           </div>
 
           {/* Submit Button */}
-          <Button disabled={isLoading} type="submit" className="">
+          <Button disabled={isLoading} type="submit" className="w-full">
             {isLoading ? "Memproses..." : "Daftar Sekarang"}
           </Button>
         </div>
       </form>
+
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      {/* Google Sign-In Button */}
+      <Button
+        variant="outline"
+        type="button"
+        className="w-full"
+        disabled={isLoading}
+        onClick={() => signIn("google", { callbackUrl: "/" })}
+      >
+        <FcGoogle className="mr-2 h-4 w-4" />
+        Google
+      </Button>
     </div>
   );
 }

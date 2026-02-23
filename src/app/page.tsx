@@ -1,7 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
-import Hero from "@/components/home/Hero";
+import Hero from "@/components/landing-page/Hero";
 import Footer from "@/components/layout/Footer";
-import Services from "@/components/home/Services";
+import Services from "@/components/landing-page/Services";
 
 export default function Home() {
   return (

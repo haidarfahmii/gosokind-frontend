@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiHome, FiClipboard, FiUser } from "react-icons/fi";
+import { FiHome, FiClipboard, FiUser, FiGlobe } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
 export default function MobileNav() {
     const pathname = usePathname();
 
     const navItems = [
-        { label: "Beranda", href: "/", icon: <FiHome size={24} /> },
+        { label: "Beranda", href: "/home", icon: <FiHome size={24} /> },
+        { label: "Gosokind", href: "/", icon: <FiGlobe size={24} /> },
         { label: "Pesanan", href: "/orders", icon: <FiClipboard size={24} /> },
         { label: "Akun", href: "/profile", icon: <FiUser size={24} /> },
     ];

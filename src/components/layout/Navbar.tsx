@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FiMenu, FiX, FiLogOut, FiUser, FiLogIn } from "react-icons/fi"; // Tambah FiLogIn untuk ikon mobile
+import { FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/features/auth/components/ui/button";
 import { FaTshirt } from "react-icons/fa";
+import { User } from "lucide-react";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -31,8 +32,8 @@ export default function Navbar() {
     return (
         <nav
             className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled
-                ? "bg-[#0a0c14]/90 backdrop-blur-md border-b border-white/10 py-3" // Ubah py-4 jadi py-3 agar lebih compact saat scroll
-                : "bg-transparent py-5" // Ubah py-6 jadi py-5
+                ? "bg-[#0a0c14]/90 backdrop-blur-md border-b border-white/10 py-3"
+                : "bg-transparent py-5"
                 }`}
         >
             <div className="container mx-auto px-4 md:px-8">
@@ -62,23 +63,28 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center gap-6">
                         {status === "authenticated" ? (
                             <div className="flex items-center gap-4 animate-fadeIn">
+                                {/* TAMBAHAN: Tombol Ke Aplikasi (Desktop) */}
+                                <Link href="/home">
+                                    <Button size="sm" className="rounded-full px-5 bg-white/10 text-white hover:bg-white/20 border border-white/10 backdrop-blur-sm">
+                                        Ke Aplikasi
+                                    </Button>
+                                </Link>
+
+                                <div className="h-6 w-px bg-white/10"></div>
+
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
-                                        <Link href={"/profile"}>
+                                    <Link href={"/profile"}>
+                                        <div className="w-9 h-9 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl border-2 border-blue-200 overflow-hidden shrink-0">
                                             {session?.user?.avatarUrl ? (
-                                                <img
-                                                    src={session.user.avatarUrl}
-                                                    alt={session.user.name}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                                <img src={session.user.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
                                             ) : (
-                                                <FiUser className="text-slate-400" size={18} />
+                                                <User className="h-5 w-5 text-slate-400" />
                                             )}
-                                        </Link>
-                                    </div>
+                                        </div>
+                                    </Link>
                                     <div className="flex flex-col">
                                         <span className="text-sm font-semibold text-white">
-                                            {session?.user?.name?.split(" ")[0]} {/* Ambil nama depan */}
+                                            {session?.user?.name?.split(" ")[0]}
                                         </span>
                                     </div>
                                 </div>
@@ -93,10 +99,7 @@ export default function Navbar() {
                             </div>
                         ) : (
                             <>
-                                <Link
-                                    href="/auth/login"
-                                    className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
-                                >
+                                <Link href="/auth/login" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
                                     Masuk
                                 </Link>
                                 <Link href="/auth/register">
@@ -150,16 +153,19 @@ export default function Navbar() {
                                         <p className="text-xs text-slate-400 truncate">{session?.user?.email}</p>
                                     </div>
                                 </div>
-                                <Button
-                                    onClick={() => signOut()}
-                                    variant="destructive"
-                                    className="w-full justify-center"
-                                >
+
+                                {/* TAMBAHAN: Tombol Ke Aplikasi (Mobile) */}
+                                <Link href="/home" onClick={() => setIsOpen(false)}>
+                                    <Button className="w-full justify-center bg-blue-600 hover:bg-blue-700 text-white">
+                                        Ke Aplikasi
+                                    </Button>
+                                </Link>
+
+                                <Button onClick={() => signOut()} variant="destructive" className="w-full justify-center">
                                     <FiLogOut className="mr-2" /> Logout
                                 </Button>
                             </div>
                         ) : (
-                            // --- PERBAIKAN MOBILE GUEST BUTTONS ---
                             <div className="grid grid-cols-2 gap-3 px-2">
                                 <Link href="/auth/login" onClick={() => setIsOpen(false)} className="w-full">
                                     <Button variant="outline" className="w-full bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white border-dashed">

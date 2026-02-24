@@ -99,6 +99,11 @@ export const SIDEBAR_ITEMS: {
           href: "/admin/outlet-admin/orders",
           icon: Package,
         },
+        {
+          label: "Reports",
+          href: "/admin/outlet-admin/reports",
+          icon: BarChart2,
+        },
       ],
     },
     {

@@ -22,3 +22,19 @@ export const formatAxisCurrency = (value: number): string => {
   }
   return `Rp ${value}`;
 };
+
+export const formatTime = (iso?: string | null): string | null =>
+  iso
+    ? new Date(iso).toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+    : null;
+
+export const formatDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });

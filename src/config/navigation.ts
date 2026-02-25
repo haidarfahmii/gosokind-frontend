@@ -8,6 +8,7 @@ import {
   Truck,
   Package,
   UserCog,
+  Briefcase,
 } from "lucide-react";
 
 // Tipe untuk item menu
@@ -119,33 +120,33 @@ export const SIDEBAR_ITEMS: {
   ],
   worker: [
     {
-      group: "Dashboard",
+      group: "Employee",
       items: [
         {
           label: "Dashboard",
-          href: "/worker/dashboard",
+          href: "/employee/dashboard",
           icon: LayoutDashboard,
         },
         {
-          label: "My Tasks",
-          href: "/worker/tasks",
-          icon: Package,
+          label: "Workfloor",
+          href: "/employee/workfloor",
+          icon: Briefcase,
         },
       ],
     },
   ],
   driver: [
     {
-      group: "Dashboard",
+      group: "Employee",
       items: [
         {
           label: "Dashboard",
-          href: "/driver/dashboard",
+          href: "/employee/dashboard",
           icon: LayoutDashboard,
         },
         {
-          label: "Deliveries",
-          href: "/driver/deliveries",
+          label: "My Jobs",
+          href: "/employee/workfloor",
           icon: Truck,
         },
       ],
@@ -168,5 +169,21 @@ export function getMenuByRole(role: string): SidebarGroup[] {
       return SIDEBAR_ITEMS.driver;
     default:
       return [];
+  }
+}
+
+export function getDefaultDashboard(role: string): string {
+  switch (role) {
+    case "SUPER_ADMIN":
+      return "/admin/super-admin/dashboard";
+    case "OUTLET_ADMIN":
+      return "/admin/outlet-admin/dashboard";
+    case "WORKER_WASHING":
+    case "WORKER_IRONING":
+    case "WORKER_PACKING":
+    case "DRIVER":
+      return "/employee/dashboard";
+    default:
+      return "/auth/login";
   }
 }

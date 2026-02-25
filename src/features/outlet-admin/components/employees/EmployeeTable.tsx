@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Pagination from "@/components/shared/Pagination";
 import { OutletEmployee } from "../../types/employee.types";
+import {
+  DeleteConfirmDialog,
+  useDeleteConfirm,
+} from "@/components/shared/DeleteConfirmDialog";
 
 interface EmployeeTableProps {
   employees: OutletEmployee[];
@@ -45,6 +49,7 @@ export function EmployeeTable({
   onToggleStatus,
   onPageChange,
 }: EmployeeTableProps) {
+  const deleteConfirm = useDeleteConfirm<OutletEmployee>();
   const getRoleBadge = (role: string) => {
     const variants: Record<string, string> = {
       WORKER_WASHING: "bg-blue-100 text-blue-700",
@@ -178,7 +183,7 @@ export function EmployeeTable({
 
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onDelete(employee.id)}
+                        onClick={() => deleteConfirm.open(employee)}
                         className="text-red-600 focus:text-red-600"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -203,6 +208,16 @@ export function EmployeeTable({
           itemsPerPage={pagination.limit}
         />
       )}
+
+      <DeleteConfirmDialog
+        {...deleteConfirm.dialogProps}
+        onConfirm={async () => {
+          if (deleteConfirm.target) await onDelete(deleteConfirm.target.id);
+        }}
+        entityType="employee"
+        itemName={deleteConfirm.target?.fullName}
+        title="Hapus Karyawan"
+      />
     </div>
   );
 }

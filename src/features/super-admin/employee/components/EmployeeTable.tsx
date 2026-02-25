@@ -29,6 +29,10 @@ import {
 } from "lucide-react";
 import { Employee, EmployeeRole } from "@/@types/employee.types";
 import Pagination from "@/components/shared/Pagination";
+import {
+  DeleteConfirmDialog,
+  useDeleteConfirm,
+} from "@/components/shared/DeleteConfirmDialog";
 
 interface EmployeeTableProps {
   data: Employee[];
@@ -76,6 +80,7 @@ export function EmployeeTable({
   pagination,
   onPageChange,
 }: EmployeeTableProps) {
+  const deleteConfirm = useDeleteConfirm<Employee>();
   const showingFrom = pagination
     ? (pagination.page - 1) * pagination.limit + 1
     : 0;
@@ -210,7 +215,7 @@ export function EmployeeTable({
 
                       <DropdownMenuItem
                         className="text-red-600 focus:text-red-600"
-                        onClick={() => onDelete(emp.id)}
+                        onClick={() => deleteConfirm.open(emp)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> Delete Account
                       </DropdownMenuItem>
@@ -235,6 +240,16 @@ export function EmployeeTable({
           showingTo={showingTo}
         />
       )}
+
+      <DeleteConfirmDialog
+        {...deleteConfirm.dialogProps}
+        onConfirm={async () => {
+          if (deleteConfirm.target) await onDelete(deleteConfirm.target.id);
+        }}
+        entityType="employee"
+        itemName={deleteConfirm.target?.fullName}
+        title="Hapus Karyawan"
+      />
     </div>
   );
 }

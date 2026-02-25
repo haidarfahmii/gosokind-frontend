@@ -1,65 +1,64 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getDefaultDashboard } from "@/config/navigation";
+
+const WORKER_ROLES = ["WORKER_WASHING", "WORKER_IRONING", "WORKER_PACKING"];
+const EMPLOYEE_ROLES = [...WORKER_ROLES, "DRIVER"];
 
 export default withAuth(
   function proxy(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
+    const role = token?.role as string | undefined;
 
-    console.log("🔐 Middleware - Path:", path, "Role:", token?.role);
-
-    if (path === "/auth/login" && token) {
-      if (token.role === "SUPER_ADMIN") {
-        console.log("✅ Redirecting Super Admin to dashboard");
-        return NextResponse.redirect(
-          new URL("/admin/super-admin/dashboard", req.url),
-        );
-      } else if (token.role === "OUTLET_ADMIN") {
-        console.log("✅ Redirecting Outlet Admin to dashboard");
-        return NextResponse.redirect(
-          new URL("/admin/outlet-admin/dashboard", req.url),
-        );
-      }
+    if (path === "/auth/login" && token && role) {
+      return NextResponse.redirect(new URL(getDefaultDashboard(role), req.url));
     }
 
+    // Super Admin route guard
     if (path.startsWith("/admin/super-admin")) {
-      if (token?.role !== "SUPER_ADMIN") {
-        console.log("❌ Unauthorized access to Super Admin route");
-        // Redirect non-super-admin to their own dashboard
-        if (token?.role === "OUTLET_ADMIN") {
+      if (role !== "SUPER_ADMIN") {
+        if (role === "OUTLET_ADMIN")
           return NextResponse.redirect(
             new URL("/admin/outlet-admin/dashboard", req.url),
           );
-        }
-        // For other roles, redirect to login
+        if (role && EMPLOYEE_ROLES.includes(role))
+          return NextResponse.redirect(new URL("/employee/dashboard", req.url));
         return NextResponse.redirect(new URL("/auth/login", req.url));
       }
     }
 
+    // Outlet Admin route guard
     if (path.startsWith("/admin/outlet-admin")) {
-      if (token?.role !== "OUTLET_ADMIN") {
-        console.log("❌ Unauthorized access to Outlet Admin route");
-        if (token?.role === "SUPER_ADMIN") {
+      if (role !== "OUTLET_ADMIN") {
+        if (role === "SUPER_ADMIN")
           return NextResponse.redirect(
             new URL("/admin/super-admin/dashboard", req.url),
           );
-        }
-        // For other roles, redirect to login
+        if (role && EMPLOYEE_ROLES.includes(role))
+          return NextResponse.redirect(new URL("/employee/dashboard", req.url));
         return NextResponse.redirect(new URL("/auth/login", req.url));
       }
     }
 
-    // If someone accesses /admin directly, redirect based on role
-    if (path === "/admin" && token) {
-      if (token.role === "SUPER_ADMIN") {
-        return NextResponse.redirect(
-          new URL("/admin/super-admin/dashboard", req.url),
-        );
-      } else if (token.role === "OUTLET_ADMIN") {
-        return NextResponse.redirect(
-          new URL("/admin/outlet-admin/dashboard", req.url),
-        );
+    // Employee (Worker / Driver) route guard
+    if (path.startsWith("/employee")) {
+      if (!role || !EMPLOYEE_ROLES.includes(role)) {
+        if (role === "SUPER_ADMIN")
+          return NextResponse.redirect(
+            new URL("/admin/super-admin/dashboard", req.url),
+          );
+        if (role === "OUTLET_ADMIN")
+          return NextResponse.redirect(
+            new URL("/admin/outlet-admin/dashboard", req.url),
+          );
+        return NextResponse.redirect(new URL("/auth/login", req.url));
       }
+    }
+
+    // Generic /admin redirect
+    if (path === "/admin" && token && role) {
+      return NextResponse.redirect(new URL(getDefaultDashboard(role), req.url));
     }
 
     return NextResponse.next();
@@ -68,18 +67,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ req, token }) => {
         const path = req.nextUrl.pathname;
-
-        // Allow access to login page without token
-        if (path === "/auth/login") {
-          return true;
-        }
-
-        // Protect all admin routes - require authentication
-        if (path.startsWith("/admin")) {
+        if (path === "/auth/login") return true;
+        if (path.startsWith("/admin") || path.startsWith("/employee"))
           return !!token;
-        }
-
-        // Allow public routes
         return true;
       },
     },
@@ -87,9 +77,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/auth/login",
-    // Add other protected routes here
-  ],
+  matcher: ["/admin/:path*", "/employee/:path*", "/auth/login"],
 };

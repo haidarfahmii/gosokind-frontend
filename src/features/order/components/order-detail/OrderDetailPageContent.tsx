@@ -175,7 +175,7 @@ export function OrderDetailPageContent({
 
       {/* ─── Dev/Testing: Admin Manual Status Control ────────────── */}
       {/* Tampil hanya saat status di station (WASHING, IRONING, PACKING, WAITING_FOR_PAYMENT) */}
-      <AdminStatusControl order={order} onSuccess={refetch} />
+      {/* <AdminStatusControl order={order} onSuccess={refetch} /> */}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

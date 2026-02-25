@@ -34,12 +34,12 @@ export const useInputOrderDetailsForm = ({
   onClose,
 }: UseInputOrderDetailsFormProps) => {
   const { laundryItems, loadingItems } = useLaundryItems(open);
-  const { workers, loadingWorkers } = useWorkers(open, order?.outlet?.id);
+  // const { workers, loadingWorkers } = useWorkers(open, order?.outlet?.id);
 
   const formik = useFormik<InputOrderDetailsFormValues>({
     initialValues: {
       totalWeight: 0,
-      workerId: "",
+      // workerId: "",
       items: [{ laundryItemId: "", quantity: 1 }],
     },
     validationSchema: inputOrderDetailsSchema,
@@ -107,8 +107,8 @@ export const useInputOrderDetailsForm = ({
     formik,
     laundryItems,
     loadingItems,
-    workers,
-    loadingWorkers,
+    // workers,
+    // loadingWorkers,
     handleAddItem,
     handleRemoveItem,
     handleItemChange,

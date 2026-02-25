@@ -16,7 +16,7 @@ import {
   LaundryItemsList,
   EstimatedPriceCard,
 } from "./index";
-import { WorkerSelectField } from "./WorkerSelectField";
+// import { WorkerSelectField } from "./WorkerSelectField";
 
 interface InputOrderDetailsDialogProps {
   open: boolean;
@@ -45,8 +45,8 @@ export function InputOrderDetailsDialog({
     formik,
     laundryItems,
     loadingItems,
-    workers,
-    loadingWorkers,
+    // workers,
+    // loadingWorkers,
     handleAddItem,
     handleRemoveItem,
     handleItemChange,
@@ -87,7 +87,7 @@ export function InputOrderDetailsDialog({
           />
 
           {/* Worker Select */}
-          <WorkerSelectField
+          {/* <WorkerSelectField
             value={formik.values.workerId}
             touched={formik.touched.workerId}
             error={formik.errors.workerId}
@@ -95,7 +95,7 @@ export function InputOrderDetailsDialog({
             loadingWorkers={loadingWorkers}
             onChange={(value) => formik.setFieldValue("workerId", value)}
             onBlur={() => formik.setFieldTouched("workerId", true)}
-          />
+          /> */}
 
           {/* Laundry Items */}
           <LaundryItemsList

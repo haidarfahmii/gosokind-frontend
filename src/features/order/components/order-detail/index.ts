@@ -1,3 +1,4 @@
+export { AdminStatusControl } from "./AdminStatusControl";
 export { BypassRequestsSection } from "./BypassRequestsSection";
 export { CustomerInfoCard } from "./CustomerInfoCard";
 export { LaundryItemsCard } from "./LaundryItemsCard";

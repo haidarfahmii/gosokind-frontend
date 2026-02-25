@@ -5,6 +5,7 @@ export enum OutletStatus {
 
 export interface Outlet {
   id: string;
+  outletCode: string;
   name: string;
   province?: string | null;
   city?: string | null;

@@ -127,7 +127,7 @@ export function OutletTable({
                           {outlet.name}
                         </p>
                         <p className="text-xs text-slate-500">
-                          ID: {outlet.id.substring(0, 8)}...
+                          {outlet.outletCode}
                         </p>
                       </div>
                     </div>

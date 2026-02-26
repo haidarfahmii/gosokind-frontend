@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 interface MismatchDetail {
   itemId: string;
@@ -22,7 +22,7 @@ interface MismatchDetail {
 interface BypassModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (reason: string) => void;
+  onSubmit: (reason: string) => Promise<void>;
   details: MismatchDetail[];
   orderNumber: string;
 }
@@ -38,15 +38,32 @@ export default function BypassModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
+    if (!reason || reason.trim().length < 5) return;
+
     setIsSubmitting(true);
-    await onSubmit(reason);
-    setIsSubmitting(false);
+    try {
+      // await onSubmit menunggu mutateAsync selesai
+      await onSubmit(reason.trim());
+
+      // Hanya reset & tutup jika submit berhasil
+      setReason("");
+      onClose();
+    } catch {
+      // Error sudah ditangani di WorkfloorPage (toast ditampilkan di sana)
+      // Modal tetap terbuka agar worker bisa mencoba lagi atau membatalkan
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (isSubmitting) return; // Jangan tutup saat sedang submit
     setReason("");
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center space-x-2 text-red-600">
@@ -63,9 +80,9 @@ export default function BypassModal({
         {details.length > 0 && (
           <div className="bg-red-50 p-4 rounded-md space-y-2 text-sm text-red-800">
             <p className="font-semibold">Differences found:</p>
-            <ul className="list-disc pl-5">
-              {details.map((d) => (
-                <li key={d.itemId}>
+            <ul className="list-disc pl-5 space-y-1">
+              {details.map((d, index) => (
+                <li key={d.itemId || index}>
                   Expected: <strong>{d.expected}</strong>, Found:{" "}
                   <strong>{d.actual}</strong>
                 </li>
@@ -84,19 +101,37 @@ export default function BypassModal({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setReason(e.target.value)
             }
+            disabled={isSubmitting}
+            rows={3}
           />
+          {reason.length > 0 && reason.trim().length < 5 && (
+            <p className="text-xs text-red-500">
+              Reason must be at least 5 characters.
+            </p>
+          )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!reason || reason.length < 5 || isSubmitting}
-            className="bg-red-600 hover:bg-red-700"
+            disabled={!reason || reason.trim().length < 5 || isSubmitting}
+            className="bg-red-600 hover:bg-red-700 gap-2"
           >
-            {isSubmitting ? "Sending Request..." : "Request Bypass"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              "Request Bypass"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

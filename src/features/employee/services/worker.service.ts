@@ -23,7 +23,7 @@ const mapDtoToStationOrder = (dto: StationOrderDTO): StationOrder => ({
   })),
   totalQty: dto.orderItems.reduce((acc, i) => acc + i.quantity, 0),
   status: dto.status as StationType | "ON_HOLD",
-  isLocked: dto.status === "ON_HOLD",
+  isLocked: dto.hasPendingBypass === true,
 });
 
 // API Calls
@@ -46,7 +46,13 @@ export const processOrder = async (payload: ProcessPayload): Promise<void> => {
  * This matches Feature 2's bypass service route.
  */
 export const requestBypass = async (payload: BypassPayload): Promise<void> => {
-  await axiosInstance.post(`/bypass`, payload);
+  const { orderId, station, reason, itemChecks } = payload;
+
+  await axiosInstance.post(`/orders/${orderId}/bypass-request`, {
+    station,
+    reason,
+    itemChecks,
+  });
 };
 
 export const getWorkerHistory = async (): Promise<WorkerHistoryItem[]> => {

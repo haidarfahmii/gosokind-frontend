@@ -79,7 +79,7 @@ export default function WorkfloorPage() {
   const { mutate: processOrderMutate } = useProcessOrder();
   const { mutate: acceptJobMutate } = useAcceptJob();
   const { mutate: completeJobMutate } = useCompleteJob();
-  const { mutate: submitBypassMutate } = useSubmitBypass();
+  const { mutateAsync: submitBypassAsync } = useSubmitBypass();
 
   // ── Notification State ───────────────────────────────────────────────────
   const [newOrderAlert, setNewOrderAlert] = useState<{
@@ -233,31 +233,23 @@ export default function WorkfloorPage() {
     );
   };
 
-  const handleBypassSubmit = (reason: string) => {
-    submitBypassMutate(
-      {
-        orderId: bypassData.orderId,
-        station: effectiveStation,
-        reason,
-        expectedQty: 0,
-        actualQty: 0,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Request Sent",
-            description: "Bypass request submitted.",
-          });
-          setBypassData((prev) => ({ ...prev, isOpen: false }));
-        },
-        onError: () =>
-          toast({
-            title: "Error",
-            description: "Failed to submit bypass.",
-            variant: "destructive",
-          }),
-      },
-    );
+  const handleBypassSubmit = async (reason: string): Promise<void> => {
+    const itemChecks = bypassData.details.map((d) => ({
+      laundryItemId: d.itemId,
+      inputQuantity: d.actual, // Qty yang diinput worker (berbeda dari admin)
+    }));
+
+    await submitBypassAsync({
+      orderId: bypassData.orderId,
+      station: effectiveStation,
+      reason,
+      itemChecks,
+    });
+    // Tampilkan toast sukses (modal menutup dirinya sendiri setelah ini)
+    toast({
+      title: "Request Sent",
+      description: "Bypass request submitted. Waiting for admin approval.",
+    });
   };
 
   const isLoading =

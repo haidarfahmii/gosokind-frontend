@@ -5,6 +5,7 @@ export interface StationOrderDTO {
   id: string;
   orderNumber: string;
   status: string;
+  hasPendingBypass?: boolean;
   orderItems: {
     id: string;
     quantity: number;
@@ -46,9 +47,11 @@ export interface ProcessPayload {
 export interface BypassPayload {
   orderId: string;
   station: StationType;
-  expectedQty: number;
-  actualQty: number;
   reason: string;
+  itemChecks: {
+    laundryItemId: string;
+    inputQuantity: number;
+  }[];
 }
 
 export interface WorkerHistoryDTO {

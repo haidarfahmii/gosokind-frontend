@@ -8,4 +8,3 @@ export const registerSchema = Yup.object().shape({
     .oneOf([true], "Anda harus menyetujui syarat dan ketentuan")
     .required("Syarat dan ketentuan wajib disetujui"),
 });
-

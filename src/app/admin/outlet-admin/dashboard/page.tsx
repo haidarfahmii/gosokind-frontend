@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import {
   Package,
   Users,
@@ -9,9 +7,10 @@ import {
   DollarSign,
   Clock,
   CheckCircle2,
-  AlertCircle,
-  Loader2,
+  RefreshCw,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -20,187 +19,129 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-// Mock data
-const mockStats = {
-  todayOrders: 24,
-  pendingOrders: 8,
-  completedToday: 16,
-  revenue: 2450000,
-  activeEmployees: 12,
-  pendingRequests: 3,
-};
-
-const mockRecentOrders = [
-  {
-    id: "#ORD-1234",
-    customer: "John Doe",
-    service: "Cuci Setrika",
-    weight: "3.5 kg",
-    status: "Processing",
-    payment: "Paid",
-  },
-  {
-    id: "#ORD-1235",
-    customer: "Jane Smith",
-    service: "Cuci Kering",
-    weight: "5.0 kg",
-    status: "Washing",
-    payment: "Pending",
-  },
-  {
-    id: "#ORD-1236",
-    customer: "Bob Johnson",
-    service: "Setrika",
-    weight: "2.0 kg",
-    status: "Ready",
-    payment: "Paid",
-  },
-];
+import { StatsCard } from "@/features/dashboard/components/StatsCard";
+import { DashboardRevenueChart } from "@/features/dashboard/components/DashboardRevenueChart";
+import { RecentOrdersWidget } from "@/features/dashboard/components/RecentOrdersWidget";
+import { SystemAlertsWidget } from "@/features/dashboard/components/SystemAlertsWidget";
+import { useOutletAdminDashboard } from "@/features/dashboard/hooks/useOutletAdminDashboard";
+import { useBypassRequests } from "@/features/order/hooks/useBypassRequests";
+import { useEmployees } from "@/features/outlet-admin/hooks/useEmployees";
+import { formatCurrency } from "@/utils/formatters";
 
 export default function OutletAdminDashboard() {
   const { data: session } = useSession();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(mockStats);
-  const [orders, setOrders] = useState(mockRecentOrders);
+  const {
+    stats,
+    recentOrders,
+    revenueData,
+    loadingStats,
+    loadingOrders,
+    loadingRevenue,
+    refetch,
+  } = useOutletAdminDashboard();
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setStats(mockStats);
-        setOrders(mockRecentOrders);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { bypassRequests, loading: loadingBypass } = useBypassRequests();
 
-    fetchDashboardData();
-  }, []);
+  const {
+    employees,
+    stats: empStats,
+    loading: loadingEmployees,
+  } = useEmployees();
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, string> = {
-      Processing: "bg-blue-100 text-blue-700",
-      Washing: "bg-yellow-100 text-yellow-700",
-      Ready: "bg-green-100 text-green-700",
-      Completed: "bg-green-100 text-green-700",
-    };
-    return variants[status] || "bg-gray-100 text-gray-700";
-  };
+  const completionRate =
+    stats && stats.totalOrders > 0
+      ? `${((stats.completedToday / stats.totalOrders) * 100).toFixed(0)}% done`
+      : undefined;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  const pendingBypassCount = bypassRequests.filter(
+    (r) => r.status === "PENDING",
+  ).length;
+
+  const isLoading = loadingStats && !stats;
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
-          Dashboard Overview
-        </h1>
-        <p className="text-slate-500 mt-1">
-          Welcome back, {session?.user?.name || "Admin"}! Here's what's
-          happening today.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
+            Dashboard Overview
+          </h1>
+          <p className="text-slate-500 mt-1">
+            Welcome back,{" "}
+            <span className="font-semibold text-slate-700">
+              {session?.user?.name ?? "Admin"}
+            </span>
+            ! Here's what's happening today.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="gap-2 text-slate-600"
+          onClick={refetch}
+          disabled={loadingStats}
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${loadingStats ? "animate-spin" : ""}`}
+          />
+          Refresh
+        </Button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Today's Orders */}
-        <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
-              Today's Orders
-            </CardTitle>
-            <Package className="h-5 w-5 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              {stats.todayOrders}
-            </div>
-            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              +12% from yesterday
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Pending Orders */}
-        <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
-              Pending Orders
-            </CardTitle>
-            <Clock className="h-5 w-5 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              {stats.pendingOrders}
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Needs immediate attention
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Completed Today */}
-        <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
-              Completed Today
-            </CardTitle>
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              {stats.completedToday}
-            </div>
-            <p className="text-xs text-green-600 mt-1">
-              {((stats.completedToday / stats.todayOrders) * 100).toFixed(0)}%
-              completion rate
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Revenue */}
-        <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
-              Today's Revenue
-            </CardTitle>
-            <DollarSign className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              Rp {(stats.revenue / 1000).toFixed(0)}k
-            </div>
-            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              +8% from yesterday
-            </p>
-          </CardContent>
-        </Card>
+        <StatsCard
+          label="Today's Orders"
+          value={stats?.totalOrders ?? 0}
+          change="+12% from yesterday"
+          changePositive
+          icon={Package}
+          iconBg="bg-blue-100"
+          iconColor="text-blue-600"
+          loading={isLoading}
+        />
+        <StatsCard
+          label="Pending Orders"
+          value={stats?.pendingOrders ?? 0}
+          icon={Clock}
+          iconBg="bg-orange-100"
+          iconColor="text-orange-600"
+          loading={isLoading}
+        />
+        <StatsCard
+          label="Completed Today"
+          value={stats?.completedToday ?? 0}
+          change={completionRate}
+          changePositive
+          icon={CheckCircle2}
+          iconBg="bg-green-100"
+          iconColor="text-green-600"
+          loading={isLoading}
+        />
+        <StatsCard
+          label="Today's Revenue"
+          value={
+            stats?.todayRevenue ? formatCurrency(stats.todayRevenue) : "Rp 0"
+          }
+          change="+8% from yesterday"
+          changePositive
+          icon={DollarSign}
+          iconBg="bg-emerald-100"
+          iconColor="text-emerald-600"
+          loading={isLoading}
+        />
       </div>
 
-      {/* Quick Actions & Alerts */}
+      {/* Revenue Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DashboardRevenueChart
+          data={revenueData}
+          loading={loadingRevenue}
+          subtitle="Monthly revenue trend for your outlet"
+        />
+      </div>
+
+      {/* Quick Actions + Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <Card className="border-none shadow-sm">
@@ -224,165 +165,131 @@ export default function OutletAdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Alerts & Notifications */}
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-500" />
-              Alerts & Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-xs font-semibold text-orange-700">
-                ⚠️ {stats.pendingRequests} Employee Requests Pending
-              </p>
-              <p className="text-xs text-slate-600 mt-1">
-                Requires your approval
-              </p>
-            </div>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs font-semibold text-blue-700">
-                📦 {stats.pendingOrders} Orders in Queue
-              </p>
-              <p className="text-xs text-slate-600 mt-1">
-                Waiting to be processed
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Alerts */}
+        <SystemAlertsWidget
+          pendingRequests={pendingBypassCount}
+          pendingOrders={stats?.pendingOrders ?? 0}
+        />
       </div>
 
       {/* Recent Orders */}
-      <Card className="border-none shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-base">Recent Orders</CardTitle>
-            <CardDescription>Latest orders from your outlet</CardDescription>
-          </div>
-          <Button variant="ghost" className="text-blue-600 text-sm">
-            View All
-          </Button>
-        </CardHeader>
-        <Table>
-          <TableHeader className="bg-slate-50">
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Service</TableHead>
-              <TableHead>Weight</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order, i) => (
-              <TableRow key={i}>
-                <TableCell className="font-semibold text-blue-600">
-                  {order.id}
-                </TableCell>
-                <TableCell className="font-medium text-slate-700">
-                  {order.customer}
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <p className="font-semibold">{order.service}</p>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-slate-600">
-                  {order.weight}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={`${getStatusBadge(order.status)} border-none`}
-                  >
-                    {order.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`text-xs font-bold ${
-                      order.payment === "Paid"
-                        ? "text-green-600"
-                        : "text-orange-500"
-                    }`}
-                  >
-                    {order.payment}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      <RecentOrdersWidget
+        orders={recentOrders}
+        loading={loadingOrders}
+        viewAllHref="/admin/outlet-admin/orders"
+        showOutlet={false}
+        subtitle="Latest orders from your outlet"
+      />
 
-      {/* Employee Summary */}
+      {/* Active Staff Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-none shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Active Staff Today</CardTitle>
             <CardDescription>
-              {stats.activeEmployees} employees currently working
+              {loadingEmployees
+                ? "Loading..."
+                : `${empStats?.active ?? stats?.activeEmployees ?? 0} employees currently working`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Washing Team</p>
-                    <p className="text-xs text-slate-500">4 active workers</p>
-                  </div>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-700"
-                >
-                  Active
-                </Badge>
+            {loadingEmployees ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-16 bg-slate-100 rounded-lg animate-pulse"
+                  />
+                ))}
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-orange-600" />
+            ) : (
+              <div className="space-y-3">
+                {/* Group employees by role */}
+                {buildRoleGroups(
+                  empStats?.byRole ?? {},
+                  stats?.activeEmployees ?? 0,
+                ).map((group) => (
+                  <div
+                    key={group.role}
+                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-10 w-10 rounded-full ${group.bg} flex items-center justify-center`}
+                      >
+                        <Users className={`h-5 w-5 ${group.color}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{group.label}</p>
+                        <p className="text-xs text-slate-500">
+                          {group.count} active
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 text-green-700"
+                    >
+                      Active
+                    </Badge>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold">Ironing Team</p>
-                    <p className="text-xs text-slate-500">5 active workers</p>
-                  </div>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-700"
-                >
-                  Active
-                </Badge>
+                ))}
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Packing Team</p>
-                    <p className="text-xs text-slate-500">3 active workers</p>
-                  </div>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-700"
-                >
-                  Active
-                </Badge>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
     </div>
   );
+}
+
+// Helper: build role group summary
+function buildRoleGroups(
+  byRole: Record<string, number>,
+  fallbackTotal: number,
+) {
+  const roleConfig: Record<
+    string,
+    { label: string; bg: string; color: string }
+  > = {
+    WORKER_WASHING: {
+      label: "Washing Team",
+      bg: "bg-blue-100",
+      color: "text-blue-600",
+    },
+    WORKER_IRONING: {
+      label: "Ironing Team",
+      bg: "bg-orange-100",
+      color: "text-orange-600",
+    },
+    WORKER_PACKING: {
+      label: "Packing Team",
+      bg: "bg-purple-100",
+      color: "text-purple-600",
+    },
+    DRIVER: { label: "Drivers", bg: "bg-green-100", color: "text-green-600" },
+  };
+
+  const groups = Object.entries(byRole)
+    .filter(([role]) => role in roleConfig)
+    .map(([role, count]) => ({
+      role,
+      count,
+      ...roleConfig[role],
+    }));
+
+  // Fallback if no data
+  if (groups.length === 0 && fallbackTotal > 0) {
+    return [
+      {
+        role: "ALL",
+        label: "All Staff",
+        count: fallbackTotal,
+        bg: "bg-blue-100",
+        color: "text-blue-600",
+      },
+    ];
+  }
+
+  return groups;
 }

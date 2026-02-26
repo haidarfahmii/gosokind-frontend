@@ -5,7 +5,6 @@ export const inputOrderDetailsSchema = Yup.object().shape({
   totalWeight: Yup.number()
     .min(0.1, "Total weight must be at least 0.1 kg")
     .required("Total weight is required"),
-  // workerId: Yup.string().required("Worker ID is required"),
   items: Yup.array()
     .of(
       Yup.object().shape({
@@ -32,7 +31,6 @@ export const handleBypassRequestSchema = Yup.object().shape({
 // TypeScript interfaces for form values
 export interface InputOrderDetailsFormValues {
   totalWeight: number;
-  // workerId: string;
   items: Array<{
     laundryItemId: string;
     quantity: number;

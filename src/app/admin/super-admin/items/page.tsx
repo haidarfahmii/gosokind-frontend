@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -10,52 +9,32 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { useDebounce } from "@/hooks/useDebounce";
-import { laundryItemService } from "@/features/super-admin/laundry-item/services/laundry-item.service";
 import { LaundryItem } from "@/features/super-admin/laundry-item/types";
 import { LaundryItemTable } from "@/features/super-admin/laundry-item/components/LaundryItemTable";
 import { LaundryItemForm } from "@/features/super-admin/laundry-item/components/LaundryItemForm";
-import Pagination from "@/components/shared/Pagination";
+import { LaundryItemFilters } from "@/features/super-admin/laundry-item/components/LaundryItemFilters";
+import { useLaundryItemList } from "@/features/super-admin/laundry-item/hooks/useLaundryItemList";
 
-export default function LaundryItemsPage() {
-  const [items, setItems] = useState<LaundryItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [search, setSearch] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
+function LaundryItemsContent() {
+  const {
+    items,
+    loading,
+    search,
+    setSearch,
+    filterCategory,
+    setFilterCategory,
+    clearFilters,
+    pagination,
+    handlePageChange,
+    handleLimitChange,
+    refetch,
+  } = useLaundryItemList();
 
-  // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<LaundryItem | undefined>(
     undefined,
   );
 
-  const debouncedSearch = useDebounce(search, 500);
-
-  const fetchItems = async () => {
-    try {
-      setIsLoading(true);
-
-      const res = await laundryItemService.getAllLaundryItems({
-        page,
-        limit: 10,
-        search: debouncedSearch,
-      });
-
-      setItems(res.data);
-      setTotalPages(res.meta.totalPages);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchItems();
-  }, [page, debouncedSearch]);
-
-  // Handlers Create, Edit, Delete
   const handleCreate = () => {
     setSelectedItem(undefined);
     setIsDialogOpen(true);
@@ -67,18 +46,18 @@ export default function LaundryItemsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus item ini?")) {
-      try {
-        await laundryItemService.deleteLaundryItem(id);
-        fetchItems();
-      } catch (error) {
-        console.error(error);
-      }
+    try {
+      const { laundryItemService } =
+        await import("@/features/super-admin/laundry-item/services/laundry-item.service");
+      await laundryItemService.deleteLaundryItem(id);
+      refetch();
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleSuccess = () => {
-    fetchItems();
+    refetch();
     setIsDialogOpen(false);
   };
 
@@ -98,31 +77,25 @@ export default function LaundryItemsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center space-x-2">
-        <Input
-          placeholder="Cari item..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
-      {/* Content */}
-      <LaundryItemTable
-        data={items}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+      <LaundryItemFilters
+        search={search}
+        filterCategory={filterCategory}
+        onSearchChange={setSearch}
+        onCategoryChange={setFilterCategory}
+        onClearFilters={clearFilters}
+        itemsPerPage={pagination.limit}
+        onItemsPerPageChange={handleLimitChange}
       />
 
-      {/* Pagination */}
-      <div className="flex justify-end">
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      </div>
+      {/* Table */}
+      <LaundryItemTable
+        data={items}
+        isLoading={loading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+      />
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -140,5 +113,13 @@ export default function LaundryItemsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function LaundryItemsPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <LaundryItemsContent />
+    </Suspense>
   );
 }

@@ -3,4 +3,3 @@ export { InputOrderDetailsDialog } from "./InputOrderDetailsDialog";
 export { LaundryItemRow } from "./LaundryItemRow";
 export { LaundryItemsList } from "./LaundryItemsList";
 export { TotalWeightField } from "./TotalWeightField";
-export { WorkerSelectField } from "./WorkerSelectField";

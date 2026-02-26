@@ -30,7 +30,7 @@ export interface LaundryItemListResponse {
   success: boolean;
   message: string;
   data: LaundryItem[];
-  meta: {
+  pagination: {
     page: number;
     limit: number;
     total: number;

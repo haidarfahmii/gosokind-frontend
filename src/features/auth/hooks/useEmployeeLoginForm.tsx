@@ -2,14 +2,16 @@
 
 import { useFormik } from "formik";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { loginSchema } from "@/features/auth/schemas/login.schema";
+import { loginSchema } from "../schemas/login.schema";
 import { LoginFormValues } from "@/@types";
+import { getDefaultDashboard } from "@/config/navigation";
 
-export const useLoginForm = () => {
+export const useEmployeeLoginForm = () => {
   const router = useRouter();
+  const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -27,8 +29,7 @@ export const useLoginForm = () => {
       try {
         setIsLoading(true);
 
-        // Gunakan provider yang sesuai dengan loginType
-        const res = await signIn("customer", {
+        const res = await signIn("employee", {
           email: values.email,
           password: values.password,
           redirect: false,
@@ -41,11 +42,17 @@ export const useLoginForm = () => {
 
         if (res?.ok) {
           toast.success("Login berhasil!");
-          router.push("/");
+
+          // Refresh session agar role tersedia, lalu redirect sesuai role
+          const updatedSession = await update();
+          const role: string = updatedSession?.user?.role ?? "";
+          const destination = getDefaultDashboard(role);
+
+          router.push(destination);
           router.refresh();
         }
       } catch (error: any) {
-        console.error("Login Error:", error);
+        console.error("Employee Login Error:", error);
         toast.error("Terjadi kesalahan sistem");
       } finally {
         setIsLoading(false);

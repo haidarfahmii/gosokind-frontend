@@ -1,15 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
-import { useLoginForm } from "../hooks/useLoginForm";
+import { useEmployeeLoginForm } from "@/features/auth/hooks/useEmployeeLoginForm";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export default function LoginForm() {
+export default function EmployeeLoginForm() {
   const { formik, isLoading, showPassword, togglePasswordVisibility } =
-    useLoginForm();
+    useEmployeeLoginForm();
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-5">
@@ -22,7 +21,7 @@ export default function LoginForm() {
           id="email"
           name="email"
           type="text"
-          placeholder="nama@email.com"
+          placeholder="employee@gosokind.com"
           autoComplete="email"
           disabled={isLoading}
           value={formik.values.email}
@@ -35,23 +34,15 @@ export default function LoginForm() {
           }
         />
         {formik.touched.email && formik.errors.email && (
-          <div className="text-xs text-red-500 ml-1 mt-1">
-            {formik.errors.email}
-          </div>
+          <p className="text-xs text-red-500 ml-1">{formik.errors.email}</p>
         )}
       </div>
 
       {/* Password Field */}
       <div className="space-y-2">
-        <div className="flex justify-between items-center ml-1">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/auth/forgot-password"
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-          >
-            Forgot Password?
-          </Link>
-        </div>
+        <Label htmlFor="password" className="ml-1">
+          Password
+        </Label>
         <div className="relative">
           <Input
             id="password"
@@ -80,20 +71,18 @@ export default function LoginForm() {
           </button>
         </div>
         {formik.touched.password && formik.errors.password && (
-          <div className="text-xs text-red-500 ml-1 mt-1">
-            {formik.errors.password}
-          </div>
+          <p className="text-xs text-red-500 ml-1">{formik.errors.password}</p>
         )}
       </div>
 
       {/* Submit Button */}
       <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? (
-          "Processing..."
+          "Memproses..."
         ) : (
           <>
             <FiLogIn size={20} className="mr-2" />
-            Masuk
+            Masuk sebagai Employee
           </>
         )}
       </Button>

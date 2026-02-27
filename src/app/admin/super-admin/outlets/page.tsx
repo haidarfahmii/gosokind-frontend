@@ -21,20 +21,9 @@ export default function OutletManagementPage() {
     handleSearch,
   } = useOutletList();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
-  const [searchQuery, setSearchQuery] = useState(search);
 
-  // handlers search dengan debounce
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    const timer = setTimeout(() => {
-      handleSearch(value);
-    }, 500);
-    return () => clearTimeout(timer);
-  };
-
-  // Handlers untuk Create dan Edit Outlet
   const handleCreateOutlet = () => {
     setSelectedOutlet(null);
     setDialogOpen(true);
@@ -70,7 +59,7 @@ export default function OutletManagementPage() {
         </Button>
       </div>
 
-      {/* Stats Cards (Optional) */}
+      {/* Stats Cards */}
       {pagination.total > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border rounded-lg p-4">
@@ -156,23 +145,17 @@ export default function OutletManagementPage() {
         </div>
       )}
 
-      {/* Search & Filters */}
+      {/* Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search outlets..."
             className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-600"
-            value={searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
-
-        {/* <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-500">
-            Showing {outlets.length} of {pagination.total} outlets
-          </span>
-        </div> */}
       </div>
 
       {/* Outlet Table */}

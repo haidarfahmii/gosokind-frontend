@@ -2,14 +2,19 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
   CreateOutletInput,
   UpdateOutletInput,
-  Outlet,
   OutletListResponse,
   OutletResponse,
   OutletWithGeocodingResponse,
   CheckLocationInput,
   CheckLocationResponse,
   OutletListQuery,
-} from "../types";
+} from "@/features/super-admin/outlet/types";
+
+export interface OutletDropdownOption {
+  id: string;
+  name: string;
+  outletCode: string;
+}
 
 export const outletService = {
   async getAllOutlets(query?: OutletListQuery): Promise<OutletListResponse> {
@@ -24,6 +29,16 @@ export const outletService = {
       return response.data;
     } catch (error: any) {
       console.error("Get outlets error:", error);
+      throw error;
+    }
+  },
+
+  async getAllOutletsForDropdown(): Promise<OutletDropdownOption[]> {
+    try {
+      const response = await axiosInstance.get("/outlets/all");
+      return response.data.data;
+    } catch (error: any) {
+      console.error("Get outlets for dropdown error:", error);
       throw error;
     }
   },

@@ -8,11 +8,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Pagination from "@/components/shared/Pagination";
-import { BypassRequest, Order } from "../../types/order.types";
-import { useExpandedRows } from "../../hooks/useExpandedRows";
-import { OrderTableLoadingState, OrderTableEmptyState, OrderTableRow } from ".";
+import { BypassRequest, Order } from "@/features/order/types/order.types";
+import { useExpandedRows } from "@/features/order/hooks/useExpandedRows";
+import {
+  OrderTableLoadingState,
+  OrderTableEmptyState,
+  OrderTableRow,
+} from "@/features/order/components/order-list";
 
-interface PaginationMeta {
+interface Pagination {
   total: number;
   page: number;
   limit: number;
@@ -24,10 +28,12 @@ interface OrderTableProps {
   isLoading: boolean;
   onViewDetail: (order: Order) => void;
   onInputDetails: (order: Order) => void;
-  pagination: PaginationMeta;
+  pagination: Pagination;
   onPageChange: (page: number) => void;
   /** Permission untuk input details — khusus Outlet Admin */
   canInputDetails?: boolean;
+  /** Tampilkan kolom outlet — hanya untuk Super Admin */
+  showOutletColumn?: boolean;
   bypassRequests?: BypassRequest[];
   onViewOrderBypass?: (order: Order, requests: BypassRequest[]) => void;
 }
@@ -40,6 +46,7 @@ export function OrderTable({
   pagination,
   onPageChange,
   canInputDetails = true,
+  showOutletColumn = true,
   bypassRequests = [],
   onViewOrderBypass = () => {},
 }: OrderTableProps) {
@@ -51,6 +58,9 @@ export function OrderTable({
   const getBypassRequestsForOrder = (orderId: string): BypassRequest[] =>
     bypassRequests.filter((br) => br.order.id === orderId);
 
+  //colSpan untuk menyesuaikan jumlah kolom
+  const colSpan = showOutletColumn ? 8 : 7;
+
   return (
     <div className="space-y-4">
       <div className="border rounded-lg overflow-hidden">
@@ -59,7 +69,9 @@ export function OrderTable({
             <TableRow className="bg-slate-50">
               <TableHead className="font-semibold">Order Number</TableHead>
               <TableHead className="font-semibold">Customer</TableHead>
-              <TableHead className="font-semibold">Outlet</TableHead>
+              {showOutletColumn && (
+                <TableHead className="font-semibold">Outlet</TableHead>
+              )}
               <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold">Weight</TableHead>
               <TableHead className="font-semibold">Price</TableHead>
@@ -79,6 +91,7 @@ export function OrderTable({
                 onViewDetail={onViewDetail}
                 onInputDetails={onInputDetails}
                 canInputDetails={canInputDetails}
+                colSpan={colSpan}
                 orderBypassRequests={getBypassRequestsForOrder(order.id)}
                 onViewOrderBypass={onViewOrderBypass}
               />

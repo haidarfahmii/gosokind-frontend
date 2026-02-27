@@ -156,6 +156,7 @@ export default function OrderPage() {
             pagination={pagination}
             onPageChange={handlePageChange}
             canInputDetails={true}
+            showOutletColumn={isSuperAdmin}
             bypassRequests={bypassRequests}
             onViewOrderBypass={handleViewOrderBypass}
           />

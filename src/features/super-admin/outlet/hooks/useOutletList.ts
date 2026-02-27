@@ -1,20 +1,27 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
-import { Outlet } from "../types";
-import { outletService } from "../services/outlet.service";
+import { Outlet } from "@/features/super-admin/outlet/types";
+import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useUrlState } from "@/hooks/useUrlState";
 
 export const useOutletList = () => {
+  const urlState = useUrlState();
+  const isInitialMount = useRef<boolean>(true);
+
+  const [search, setSearch] = useState(() => urlState.getParam("search", ""));
+  const debouncedSearch = useDebounce(search, 500);
+
   const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
+    page: urlState.getParamAsNumber("page", 1),
+    limit: urlState.getParamAsNumber("limit", 10),
     total: 0,
     totalPages: 0,
   });
-  const [search, setSearch] = useState<string>("");
 
   const fetchOutlets = useCallback(async () => {
     try {
@@ -28,7 +35,11 @@ export const useOutletList = () => {
 
       if (response.success) {
         setOutlets(response.data);
-        setPagination(response.pagination);
+        setPagination((prev) => ({
+          ...prev,
+          total: response.pagination.total,
+          totalPages: response.pagination.totalPages,
+        }));
       }
     } catch (error: any) {
       console.error("Fetch outlets error:", error);
@@ -36,10 +47,26 @@ export const useOutletList = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search]);
+  }, [pagination.page, pagination.limit, debouncedSearch]);
 
+  // Reset ke page 1 saat search berubah
   useEffect(() => {
+    if (isInitialMount.current) return;
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  }, [debouncedSearch]);
+
+  // Sinkronisasi URL & trigger fetch
+  useEffect(() => {
+    const urlParams: Record<string, string | null> = {
+      search: debouncedSearch || null,
+      page: pagination.page !== 1 ? String(pagination.page) : null,
+      limit: pagination.limit !== 10 ? String(pagination.limit) : null,
+    };
+
+    urlState.setParams(urlParams);
     fetchOutlets();
+
+    isInitialMount.current = false;
   }, [fetchOutlets]);
 
   const deleteOutlet = async (id: string) => {
@@ -66,12 +93,19 @@ export const useOutletList = () => {
 
   const handleSearch = (searchQuery: string) => {
     setSearch(searchQuery);
-    setPagination((prev) => ({ ...prev, page: 1 }));
+    // Reset page dilakukan via useEffect [debouncedSearch]
   };
 
   const handleLimitChange = (newLimit: number) => {
     setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
   };
+
+  // Cleanup abort jika diperlukan di masa depan
+  useEffect(() => {
+    return () => {
+      isInitialMount.current = true;
+    };
+  }, []);
 
   return {
     outlets,

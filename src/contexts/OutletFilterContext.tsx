@@ -1,71 +1,63 @@
 "use client";
 
-import { createContext, useState, useEffect, ReactNode } from "react";
-import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
-import { toast } from "react-toastify";
-
-interface Outlet {
-  id: string;
-  name: string;
-  province?: string | null;
-  city?: string | null;
-  status?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-}
+import {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import {
+  outletService,
+  OutletDropdownOption,
+} from "@/features/super-admin/outlet/services/outlet.service";
 
 interface OutletFilterContextValue {
   selectedOutletId: string;
   setSelectedOutletId: (id: string) => void;
-  outlets: Outlet[];
+  outlets: OutletDropdownOption[];
   loadingOutlets: boolean;
-  refreshOutlets: () => Promise<void>;
 }
 
 export const OutletFilterContext = createContext<
   OutletFilterContextValue | undefined
 >(undefined);
 
-export function OutletFilterProvider({ children }: { children: ReactNode }) {
+interface OutletFilterProviderProps {
+  children: ReactNode;
+}
+
+export function OutletFilterProvider({ children }: OutletFilterProviderProps) {
   const [selectedOutletId, setSelectedOutletId] = useState<string>("all");
-  const [outlets, setOutlets] = useState<Outlet[]>([]);
+  const [outlets, setOutlets] = useState<OutletDropdownOption[]>([]);
   const [loadingOutlets, setLoadingOutlets] = useState<boolean>(true);
 
-  const fetchOutlets = async () => {
+  const fetchOutlets = useCallback(async () => {
     try {
       setLoadingOutlets(true);
-      const response = await outletService.getAllOutlets();
-
-      if (response.success && response.data) {
-        setOutlets(response.data);
-      }
-    } catch (error: any) {
-      console.error("Failed to fetch outlets:", error);
-      toast.error("Failed to load outlets");
+      const data = await outletService.getAllOutletsForDropdown();
+      setOutlets(data);
+    } catch (error) {
+      console.error("Failed to fetch outlets for filter:", error);
+      setOutlets([]);
     } finally {
       setLoadingOutlets(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchOutlets();
-  }, []);
-
-  const refreshOutlets = async () => {
-    await fetchOutlets();
-  };
-
-  const value: OutletFilterContextValue = {
-    selectedOutletId,
-    setSelectedOutletId,
-    outlets,
-    loadingOutlets,
-    refreshOutlets,
-  };
+  }, [fetchOutlets]);
 
   return (
-    <OutletFilterContext.Provider value={value}>
+    <OutletFilterContext.Provider
+      value={{
+        selectedOutletId,
+        setSelectedOutletId,
+        outlets,
+        loadingOutlets,
+      }}
+    >
       {children}
     </OutletFilterContext.Provider>
   );

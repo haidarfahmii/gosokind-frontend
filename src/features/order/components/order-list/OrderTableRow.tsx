@@ -8,9 +8,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
-import { BypassRequest, Order } from "../../types/order.types";
+import { BypassRequest, Order } from "@/features/order/types/order.types";
 import { formatCurrency } from "@/utils/formatters";
-import { OrderStatusBadge, OrderActionButtons, OrderItemsPreview } from ".";
+import {
+  OrderStatusBadge,
+  OrderActionButtons,
+  OrderItemsPreview,
+} from "@/features/order/components/order-list";
 
 interface OrderTableRowProps {
   order: Order;
@@ -19,6 +23,8 @@ interface OrderTableRowProps {
   onViewDetail: (order: Order) => void;
   onInputDetails: (order: Order) => void;
   canInputDetails: boolean;
+  showOutletColumn?: boolean;
+  colSpan?: number;
   orderBypassRequests: BypassRequest[];
   onViewOrderBypass: (order: Order, requests: BypassRequest[]) => void;
 }
@@ -30,6 +36,8 @@ export function OrderTableRow({
   onViewDetail,
   onInputDetails,
   canInputDetails,
+  showOutletColumn = true,
+  colSpan = 8,
   orderBypassRequests,
   onViewOrderBypass,
 }: OrderTableRowProps) {
@@ -67,13 +75,15 @@ export function OrderTableRow({
           </div>
         </TableCell>
 
-        {/* Outlet */}
-        <TableCell>
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-            <span className="text-sm">{order.outlet?.name ?? "-"}</span>
-          </div>
-        </TableCell>
+        {/* Outlet - hanya super admin*/}
+        {showOutletColumn && (
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="text-sm">{order.outlet?.name ?? "-"}</span>
+            </div>
+          </TableCell>
+        )}
 
         {/* Status */}
         <TableCell>

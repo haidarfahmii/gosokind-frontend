@@ -31,7 +31,7 @@ export function useLaundryItemList() {
   const [pagination, setPagination] = useState<PaginationData>({
     total: 0,
     page: urlState.getParamAsNumber("page", 1),
-    limit: urlState.getParamAsNumber("limit", 5),
+    limit: urlState.getParamAsNumber("limit", 10),
     totalPages: 0,
   });
 
@@ -75,7 +75,7 @@ export function useLaundryItemList() {
       search: debouncedSearch || null,
       category: filterCategory !== "all" ? filterCategory : null,
       page: pagination.page !== 1 ? String(pagination.page) : null,
-      limit: pagination.limit !== 5 ? String(pagination.limit) : null,
+      limit: pagination.limit !== 10 ? String(pagination.limit) : null,
     };
 
     urlState.setParams(urlParams);
@@ -87,7 +87,7 @@ export function useLaundryItemList() {
   const clearFilters = () => {
     setSearch("");
     setFilterCategory("all");
-    setPagination((prev) => ({ ...prev, page: 1, limit: 5 }));
+    setPagination((prev) => ({ ...prev, page: 1, limit: 10 }));
   };
 
   return {

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ReportPeriod } from "../types/report.types";
+import { ReportPeriod } from "@/features/report/types/report.types";
 
 // Sales Filter Bar
 interface SalesFilterBarProps {
@@ -43,6 +43,7 @@ export function SalesFilterBar({
   loading,
 }: SalesFilterBarProps) {
   const handleOutletChange = onOutletChange ?? (() => {});
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       {/* Period */}

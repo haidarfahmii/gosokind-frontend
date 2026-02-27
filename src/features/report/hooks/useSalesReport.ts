@@ -6,8 +6,8 @@ import {
   SalesReportQuery,
   SalesReportResponse,
   ReportPeriod,
-} from "../types/report.types";
-import { reportService } from "../services/report.service";
+} from "@/features/report/types/report.types";
+import { reportService } from "@/features/report/services/report.service";
 
 interface UseSalesReportReturn {
   report: SalesReportResponse["data"] | null;
@@ -26,19 +26,32 @@ interface UseSalesReportReturn {
   refetch: () => void;
 }
 
-// Default dates: 1st of current month → today
-const getDefaultDates = () => {
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startDate = firstDay.toISOString().split("T")[0];
-  const endDate = now.toISOString().split("T")[0];
-  return { startDate, endDate };
+const INITIAL_PERIOD: ReportPeriod = "daily";
+
+const getDatesForPeriod = (period: ReportPeriod) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  if (period === "daily") {
+    return { startDate: todayStr, endDate: todayStr };
+  }
+
+  if (period === "monthly") {
+    const start = new Date(today);
+    start.setDate(start.getDate() - 30);
+    return { startDate: start.toISOString().split("T")[0], endDate: todayStr };
+  }
+
+  // yearly
+  const start = new Date(today);
+  start.setFullYear(start.getFullYear() - 1);
+  return { startDate: start.toISOString().split("T")[0], endDate: todayStr };
 };
 
 export function useSalesReport(
   initialOutletId: string = "all",
 ): UseSalesReportReturn {
-  const defaults = getDefaultDates();
+  const initialDates = getDatesForPeriod(INITIAL_PERIOD);
 
   const [report, setReport] = useState<SalesReportResponse["data"] | null>(
     null,
@@ -47,10 +60,18 @@ export function useSalesReport(
   const [error, setError] = useState<string | null>(null);
 
   // Filters
-  const [period, setPeriod] = useState<ReportPeriod>("daily");
-  const [startDate, setStartDate] = useState(defaults.startDate);
-  const [endDate, setEndDate] = useState(defaults.endDate);
+  const [period, setPeriod] = useState<ReportPeriod>(INITIAL_PERIOD);
+  const [startDate, setStartDate] = useState(initialDates.startDate);
+  const [endDate, setEndDate] = useState(initialDates.endDate);
   const [outletId, setOutletId] = useState(initialOutletId);
+
+  const handlePeriodChange = useCallback((newPeriod: ReportPeriod) => {
+    const { startDate: newStart, endDate: newEnd } =
+      getDatesForPeriod(newPeriod);
+    setPeriod(newPeriod);
+    setStartDate(newStart);
+    setEndDate(newEnd);
+  }, []);
 
   const fetchReport = useCallback(async () => {
     try {
@@ -88,7 +109,7 @@ export function useSalesReport(
     loading,
     error,
     period,
-    setPeriod,
+    setPeriod: handlePeriodChange,
     startDate,
     setStartDate,
     endDate,

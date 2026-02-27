@@ -110,9 +110,6 @@ export default function SuperAdminDashboardPage() {
           <Button variant="outline" className="gap-2 text-slate-600">
             <Calendar className="w-4 h-4" /> Date Filter
           </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-            <Shirt className="w-4 h-4" /> New Order (Walk-in)
-          </Button>
         </div>
       </div>
 

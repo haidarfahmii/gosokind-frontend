@@ -173,17 +173,17 @@ export default function OutletAdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <RecentOrdersWidget
-        orders={recentOrders}
-        loading={loadingOrders}
-        viewAllHref="/admin/outlet-admin/orders"
-        showOutlet={false}
-        subtitle="Latest orders from your outlet"
-      />
-
-      {/* Active Staff Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm">
+        <RecentOrdersWidget
+          orders={recentOrders}
+          loading={loadingOrders}
+          viewAllHref="/admin/outlet-admin/orders"
+          showOutlet={false}
+          subtitle="Latest orders from your outlet"
+        />
+
+        {/* Active Staff Summary */}
+        <Card className="border-none shadow-sm flex flex-col">
           <CardHeader>
             <CardTitle className="text-base">Active Staff Today</CardTitle>
             <CardDescription>

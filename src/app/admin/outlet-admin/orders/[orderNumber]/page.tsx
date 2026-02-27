@@ -1,21 +1,21 @@
 import { OrderDetailPageContent } from "@/features/order/components/order-detail/OrderDetailPageContent";
 
 interface OutletAdminOrderDetailPageProps {
-  params: Promise<{ orderId: string }>;
+  params: Promise<{ orderNumber: string }>;
 }
 
 /**
  * Halaman Order Detail untuk Outlet Admin
- * Route: /admin/outlet-admin/orders/[orderId]
+ * Route: /admin/outlet-admin/orders/[orderNumber]
  */
 export default async function OutletAdminOrderDetailPage({
   params,
 }: OutletAdminOrderDetailPageProps) {
-  const { orderId } = await params;
+  const { orderNumber } = await params;
 
   return (
     <OrderDetailPageContent
-      orderId={orderId}
+      orderNumber={orderNumber}
       backHref="/admin/outlet-admin/orders"
       roleLabel="Outlet Admin"
     />

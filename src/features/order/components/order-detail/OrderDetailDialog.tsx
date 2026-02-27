@@ -39,9 +39,9 @@ export function OrderDetailDialog({
   const role = session?.user?.role;
   const detailPageHref =
     role === "SUPER_ADMIN"
-      ? `/admin/super-admin/orders/${order.id}`
+      ? `/admin/super-admin/orders/${order.orderNumber}`
       : role === "OUTLET_ADMIN"
-        ? `/admin/outlet-admin/orders/${order.id}`
+        ? `/admin/outlet-admin/orders/${order.orderNumber}`
         : null;
 
   return (

@@ -29,6 +29,15 @@ export const orderService = {
   },
 
   /**
+   * Get order by orderNumber (human-readable identifier)
+   * Digunakan untuk halaman detail dengan URL /orders/INV-YYYYMMDDXXX
+   */
+  async getOrderByOrderNumber(orderNumber: string): Promise<OrderResponse> {
+    const response = await axiosInstance.get(`/orders/number/${orderNumber}`);
+    return response.data;
+  },
+
+  /**
    * Input order details (weight & items) after arrival at outlet
    * Precondition: Order status must be ARRIVED_AT_OUTLET
    * Result: Status changes to WASHING

@@ -27,24 +27,17 @@ import {
 } from "@/features/order/components/order-detail";
 
 interface OrderDetailPageContentProps {
-  orderId: string;
+  orderNumber: string;
   backHref: string; // -> Path balik ke halaman daftar order, sesuai role
   roleLabel?: string; // -> Role label untuk breadcrumb
 }
 
-/**
- * OrderDetailPageContent - Shared content untuk halaman Order Detail.
- *
- * Dipakai:
- * - /admin/super-admin/orders/[orderId]
- * - /admin/outlet-admin/orders/[orderId]
- */
 export function OrderDetailPageContent({
-  orderId,
+  orderNumber,
   backHref,
   roleLabel,
 }: OrderDetailPageContentProps) {
-  const { order, loading, error, refetch } = useOrderDetail(orderId);
+  const { order, loading, error, refetch } = useOrderDetail(orderNumber);
   const {
     bypassRequests: allPendingBypassRequests,
     loading: bypassLoading,
@@ -55,7 +48,7 @@ export function OrderDetailPageContent({
 
   // filter, hanya menampilkan bypass request yang milik order ini
   const pendingBypassRequests = allPendingBypassRequests.filter(
-    (req) => req.order.id === orderId,
+    (req) => order && req.order.id === order.id,
   );
   const [bypassDialogOpen, setBypassDialogOpen] = useState<boolean>(false);
   const hasPendingBypass = pendingBypassRequests.length > 0;

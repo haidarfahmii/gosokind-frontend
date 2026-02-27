@@ -13,26 +13,26 @@ interface UseOrderDetailReturn {
 }
 
 /**
- * Hook untuk fetch detail order berdasarkan ID.
+ * Hook untuk fetch detail order berdasarkan orderNumber.
  *
- * Digunakan di halaman Order Detail (/admin/[role]/orders/[orderId])
+ * Digunakan di halaman Order Detail (/admin/[role]/orders/[orderNumber])
  * maupun bisa digunakan ulang di komponen lain yang butuh data order tunggal.
  *
- * @param orderId - ID order yang ingin di-fetch
+ * @param orderNumber - Nomor order (contoh: INV-20260225002)
  */
-export function useOrderDetail(orderId: string): UseOrderDetailReturn {
+export function useOrderDetail(orderNumber: string): UseOrderDetailReturn {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOrder = useCallback(async () => {
-    if (!orderId) return;
+    if (!orderNumber) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      const response = await orderService.getOrderById(orderId);
+      const response = await orderService.getOrderByOrderNumber(orderNumber);
 
       if (response.success) {
         setOrder(response.data);
@@ -48,7 +48,7 @@ export function useOrderDetail(orderId: string): UseOrderDetailReturn {
     } finally {
       setLoading(false);
     }
-  }, [orderId]);
+  }, [orderNumber]);
 
   useEffect(() => {
     fetchOrder();

@@ -1,21 +1,21 @@
 import { OrderDetailPageContent } from "@/features/order/components/order-detail/OrderDetailPageContent";
 
 interface SuperAdminOrderDetailPageProps {
-  params: Promise<{ orderId: string }>;
+  params: Promise<{ orderNumber: string }>;
 }
 
 /**
  * Halaman Order Detail untuk Super Admin
- * Route: /admin/super-admin/orders/[orderId]
+ * Route: /admin/super-admin/orders/[orderNumber]
  */
 export default async function SuperAdminOrderDetailPage({
   params,
 }: SuperAdminOrderDetailPageProps) {
-  const { orderId } = await params;
+  const { orderNumber } = await params;
 
   return (
     <OrderDetailPageContent
-      orderId={orderId}
+      orderNumber={orderNumber}
       backHref="/admin/super-admin/orders"
       roleLabel="Super Admin"
     />

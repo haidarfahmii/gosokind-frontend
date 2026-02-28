@@ -2,31 +2,62 @@
 
 import { useState, useEffect } from "react";
 import MobileNav from "@/components/layout/MobileNav";
-import { Package, ChevronRight, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { Package, ChevronRight, CheckCircle2, Clock, Loader2, ChevronLeft } from "lucide-react";
 import axiosInstance from "@/utils/axiosInstance";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge";
 
 export default function OrdersPage() {
     const { data: session } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    // Membaca initial state dari URL parameters
+    const urlTab = searchParams.get("tab") as "Active" | "Completed" | null;
+    const urlPage = searchParams.get("page");
+
+    const [activeTab, setActiveTab] = useState<"Active" | "Completed">(urlTab || "Active");
+    const [page, setPage] = useState<number>(urlPage ? parseInt(urlPage) : 1);
     
-    const [activeTab, setActiveTab] = useState<"AKTIF" | "SELESAI">("AKTIF");
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [totalPages, setTotalPages] = useState(1);
+    const limit = 5;
+
+    // Fungsi untuk memperbarui URL tanpa me-reload halaman
+    const updateUrlParams = (newTab: string, newPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("tab", newTab);
+        params.set("page", newPage.toString());
+        // scroll: false agar posisi scroll tidak kembali ke atas saat ganti halaman URL
+        router.push(`${pathname}?${params.toString()}`, { scroll: false }); 
+    };
 
     useEffect(() => {
         const fetchOrders = async () => {
             if (!session?.user) return;
             try {
                 setIsLoading(true);
-                const response = await axiosInstance.get('/customer/orders');
-                const fetchedOrders = response.data.data?.data || response.data.data.orders || [];
-                const sortedOrders = fetchedOrders.sort((a: any, b: any) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                );
-                setOrders(sortedOrders);
+                let url = `/customer/orders?page=${page}&limit=${limit}`;
+                if (activeTab === "Completed") {
+                    url += `&status=COMPLETED`;
+                }
+                const response = await axiosInstance.get(url);
+                const responseData = response.data.data;
+                const fetchedOrders = responseData?.orders || [];
+                const pagination = responseData?.pagination;
+
+                setOrders(fetchedOrders);
+
+                if (pagination) {
+                    setTotalPages(pagination.totalPages || 1);
+                }
+                
+                // Sinkronisasi state ke URL setiap kali sukses fetch
+                updateUrlParams(activeTab, page);
+                
             } catch (error) {
                 console.error("Gagal memuat riwayat pesanan:", error);
             } finally {
@@ -35,11 +66,21 @@ export default function OrdersPage() {
         };
 
         fetchOrders();
-    }, [session]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session, page, activeTab]);
 
-    const filteredOrders = orders.filter(order =>
-        activeTab === "SELESAI" ? order.status === "COMPLETED" : order.status !== "COMPLETED"
-    );
+    const handleTabChange = (tab: "Active" | "Completed") => {
+        setActiveTab(tab);
+        setPage(1); // Reset ke halaman 1 setiap kali pindah tab
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+    };
+
+    const displayedOrders = activeTab === "Active"
+        ? orders.filter(order => order.status !== "COMPLETED")
+        : orders;
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -54,32 +95,38 @@ export default function OrdersPage() {
     return (
         <div className="min-h-screen bg-[#f8f9fa] pb-24 font-sans">
             <div className="max-w-md mx-auto min-h-screen flex flex-col relative bg-[#f8f9fa]">
-                {/* Header ... */}
-                <header className="bg-white px-5 pt-8 pb-4 sticky top-0 z-10 border-b border-gray-100">
+                <header className="bg-white px-5 pt-8 pb-4 sticky top-0 z-10 border-b border-gray-100 shadow-sm">
                     <h1 className="text-xl font-bold text-gray-800">Riwayat Pesanan</h1>
                     <div className="flex gap-4 mt-6 border-b border-gray-200">
-                        <button onClick={() => setActiveTab("AKTIF")} className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "AKTIF" ? "text-blue-600" : "text-gray-500"}`}>
-                            Sedang Berjalan {activeTab === "AKTIF" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
+                        <button
+                            onClick={() => handleTabChange("Active")}
+                            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "Active" ? "text-blue-600" : "text-gray-500"}`}
+                        >
+                            Sedang Berjalan
+                            {activeTab === "Active" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
                         </button>
-                        <button onClick={() => setActiveTab("SELESAI")} className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "SELESAI" ? "text-blue-600" : "text-gray-500"}`}>
-                            Selesai {activeTab === "SELESAI" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
+                        <button
+                            onClick={() => handleTabChange("Completed")}
+                            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "Completed" ? "text-blue-600" : "text-gray-500"}`}
+                        >
+                            Selesai
+                            {activeTab === "Completed" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
                         </button>
                     </div>
                 </header>
 
-                {/* Orders List */}
                 <main className="flex-1 p-5">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-64 text-blue-600">
                             <Loader2 className="h-8 w-8 animate-spin mb-4" />
                             <p className="text-sm text-gray-500">Memuat data pesanan...</p>
                         </div>
-                    ) : filteredOrders.length > 0 ? (
+                    ) : displayedOrders.length > 0 ? (
                         <div className="space-y-4">
-                            {filteredOrders.map((order) => (
-                                <div 
-                                    key={order.id} 
-                                    onClick={() => router.push(`/orders/${order.orderNumber}`)} 
+                            {displayedOrders.map((order) => (
+                                <div
+                                    key={order.id}
+                                    onClick={() => router.push(`/orders/${order.orderNumber}`)}
                                     className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-200 hover:shadow-md active:bg-gray-50 transition-all cursor-pointer"
                                 >
                                     <div className="flex justify-between items-start mb-3">
@@ -87,10 +134,7 @@ export default function OrdersPage() {
                                             <Package size={16} className="text-gray-400" />
                                             <span className="font-bold text-gray-800 text-sm">{order.orderNumber || order.id}</span>
                                         </div>
-                                        
-                                        {/* Gunakan Komponen di sini */}
                                         <OrderStatusBadge status={order.status} />
-
                                     </div>
 
                                     <div className="flex justify-between items-end mt-4">
@@ -112,6 +156,36 @@ export default function OrdersPage() {
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Kontrol Pagination - Model Compact */}
+                            {totalPages > 1 && (
+                                <div className="flex justify-center mt-6 pt-4 border-t border-gray-100">
+                                    <div className="flex items-center bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
+                                        <button
+                                            onClick={() => handlePageChange(Math.max(page - 1, 1))}
+                                            disabled={page === 1}
+                                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full disabled:text-gray-300 disabled:hover:bg-transparent transition-all"
+                                            aria-label="Halaman Sebelumnya"
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+
+                                        <span className="text-xs font-semibold text-gray-600 px-4 min-w-16 text-center">
+                                            {page} / {totalPages}
+                                        </span>
+
+                                        <button
+                                            onClick={() => handlePageChange(Math.min(page + 1, totalPages))}
+                                            disabled={page === totalPages}
+                                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full disabled:text-gray-300 disabled:hover:bg-transparent transition-all"
+                                            aria-label="Halaman Selanjutnya"
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-64 text-center px-4">
@@ -119,7 +193,7 @@ export default function OrdersPage() {
                                 <CheckCircle2 size={32} />
                             </div>
                             <h3 className="font-bold text-gray-800 mb-1">Belum ada pesanan</h3>
-                            <p className="text-sm text-gray-500">Anda belum memiliki pesanan {activeTab === "SELESAI" ? "yang selesai" : "yang sedang berjalan"}.</p>
+                            <p className="text-sm text-gray-500">Anda belum memiliki pesanan {activeTab === "Completed" ? "yang selesai" : "yang sedang berjalan"}.</p>
                         </div>
                     )}
                 </main>

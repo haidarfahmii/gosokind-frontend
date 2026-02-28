@@ -80,7 +80,7 @@ const nextAuthHandler = NextAuth({
             email: user.email,
             name: user.name,
             googleId: user.id, // atau sub dari profile
-            avatarUrl: user.image
+            // avatarUrl: user.image
           });
 
           const apiResponse = response.data;
@@ -105,7 +105,7 @@ const nextAuthHandler = NextAuth({
         token.email = user?.email;
         token.role = user?.role;
         token.name = user?.name;
-        token.avatarUrl = user.avatarUrl! || user.image!;
+        // token.avatarUrl = user.avatarUrl! || user.image!;
 
         if (account?.provider === "google") {
           token.accessToken = user.accessToken;

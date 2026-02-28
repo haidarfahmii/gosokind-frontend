@@ -124,7 +124,7 @@ export default function LoginForm() {
                 variant="outline" // Pastikan Button support variant ini atau sesuaikan style
                 type="button"
                 className="w-full"
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => signIn("google", { callbackUrl: "/home" })}
             >
                 <FcGoogle className="mr-2 h-4 w-4" />
                 Google

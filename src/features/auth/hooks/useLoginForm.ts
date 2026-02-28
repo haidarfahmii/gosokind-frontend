@@ -43,7 +43,7 @@ export const useLoginForm = () => {
 
                 if (res?.ok) {
                     toast.success("Login berhasil! Mengalihkan...");
-                    router.push("/");
+                    router.push("/home");
                     router.refresh();
                 }
             } catch (error: any) {

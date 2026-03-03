@@ -40,7 +40,16 @@ export function OutletForm({
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={formik.isSubmitting || !formik.isValid}>
+        <Button
+          type="submit"
+          disabled={
+            formik.isSubmitting ||
+            !formik.isValid ||
+            // Tombol disabled jika koordinat belum dipilih dari peta
+            formik.values.latitude === null ||
+            formik.values.longitude === null
+          }
+        >
           {formik.isSubmitting ? (
             <>
               <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

@@ -61,7 +61,6 @@ export const SIDEBAR_ITEMS: {
           label: "Orders",
           href: "/admin/super-admin/orders",
           icon: Truck,
-          alert: true,
         },
         {
           label: "Reports",

@@ -4,9 +4,6 @@ import {
   UpdateOutletInput,
   OutletListResponse,
   OutletResponse,
-  OutletWithGeocodingResponse,
-  CheckLocationInput,
-  CheckLocationResponse,
   OutletListQuery,
 } from "@/features/super-admin/outlet/types";
 
@@ -53,34 +50,7 @@ export const outletService = {
     }
   },
 
-  /**
-   * CHECK LOCATION (Preview Geocoding)
-   * ENDPOINT BARU untuk preview hasil geocoding SEBELUM save
-   *
-   * Use case:
-   * - Admin input alamat di form
-   * - Frontend hit endpoint ini untuk preview koordinat
-   * - Admin review apakah lokasi sudah benar di map
-   * - Baru kemudian save via createOutlet
-   */
-  async checkLocation(
-    data: CheckLocationInput,
-  ): Promise<CheckLocationResponse> {
-    try {
-      const response = await axiosInstance.post(
-        "/outlets/check-location",
-        data,
-      );
-      return response.data;
-    } catch (error: any) {
-      console.error("Check location error:", error);
-      throw error;
-    }
-  },
-
-  async createOutlet(
-    data: CreateOutletInput,
-  ): Promise<OutletWithGeocodingResponse> {
+  async createOutlet(data: CreateOutletInput): Promise<OutletResponse> {
     try {
       const response = await axiosInstance.post("/outlets", data);
       return response.data;
@@ -129,23 +99,13 @@ export const outletService = {
    */
   async calculateShipping(
     outletId: string,
-    customerAddressId: string,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: {
-      outletId: string;
-      outletName: string;
-      customerAddressId: string;
-      distance: number;
-      shippingPrice: number;
-      estimatedTime: number;
-    };
-  }> {
+    latitude: number,
+    longitude: number,
+  ) {
     try {
       const response = await axiosInstance.post(
         `/outlets/${outletId}/calculate-shipping`,
-        { customerAddressId },
+        { latitude, longitude },
       );
       return response.data;
     } catch (error: any) {

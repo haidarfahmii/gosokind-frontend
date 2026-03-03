@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
-import { outletSchema } from "../schemas/outletValidationSchema";
-import { outletService } from "../services/outlet.service";
+import { outletSchema } from "@/features/super-admin/outlet/schemas/outletValidationSchema";
+import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
 import {
   Outlet,
   OutletFormValues,
-  CheckLocationResult,
   OutletStatus,
-} from "../types";
+} from "@/features/super-admin/outlet/types";
 
 interface UseOutletFormProps {
   onSuccess: () => void;
@@ -19,28 +18,19 @@ interface UseOutletFormProps {
 
 export type UseOutletFormReturn = {
   formik: ReturnType<typeof useFormik<OutletFormValues>>;
-  locationPreview: CheckLocationResult | null;
-  isCheckingLocation: boolean;
-  showMapPreview: boolean;
-  handleCheckLocation: () => Promise<void>;
-  handleClearPreview: () => void;
-  handleAddressChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => void;
-  handleCoordinatesChange: (
-    field: "latitude" | "longitude",
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Apakah sedang mendeteksi lokasi lewat browser geolocation */
+  isLocating: boolean;
+  /** Pindahkan marker ke lokasi browser user */
+  handleGetCurrentLocation: () => void;
+  /** Dipanggil MapPicker saat user klik di peta */
+  handleMapChange: (lat: number, lng: number) => void;
 };
 
 export const useOutletForm = ({
   onSuccess,
   initialData,
 }: UseOutletFormProps): UseOutletFormReturn => {
-  // State untuk location preview
-  const [locationPreview, setLocationPreview] =
-    useState<CheckLocationResult | null>(null);
-  const [isCheckingLocation, setIsCheckingLocation] = useState(false);
-  const [showMapPreview, setShowMapPreview] = useState(false);
+  const [isLocating, setIsLocating] = useState<boolean>(false);
 
   const formik = useFormik<OutletFormValues>({
     enableReinitialize: true,
@@ -50,8 +40,9 @@ export const useOutletForm = ({
       city: initialData?.city || "",
       status: initialData?.status || "AVAILABLE",
       address: initialData?.address || "",
-      latitude: initialData?.latitude || "",
-      longitude: initialData?.longitude || "",
+      // Gunakan null jika tidak ada data awal (map wajib diklik sebelum submit)
+      latitude: initialData?.latitude ?? null,
+      longitude: initialData?.longitude ?? null,
     },
     validationSchema: outletSchema,
     onSubmit: async (values) => {
@@ -62,30 +53,25 @@ export const useOutletForm = ({
           city: values.city || undefined,
           status: values.status as OutletStatus,
           address: values.address,
-          latitude: values.latitude ? Number(values.latitude) : undefined,
-          longitude: values.longitude ? Number(values.longitude) : undefined,
+          // Sudah pasti bukan null karena Yup required memastikannya
+          latitude: values.latitude as number,
+          longitude: values.longitude as number,
         };
 
         if (initialData?.id) {
-          // Update mode
           await outletService.updateOutlet(initialData.id, {
             id: initialData.id,
             ...payload,
           });
           toast.success("Outlet updated successfully");
         } else {
-          // Create mode
           await outletService.createOutlet(payload);
           toast.success("Outlet created successfully");
         }
 
-        // Reset states
-        setLocationPreview(null);
-        setShowMapPreview(false);
         formik.resetForm();
         onSuccess();
       } catch (error: any) {
-        console.error("Form submit error:", error);
         const errorMessage =
           error.response?.data?.message || "Failed to save outlet";
         toast.error(errorMessage);
@@ -93,99 +79,42 @@ export const useOutletForm = ({
     },
   });
 
-  const handleCheckLocation = async () => {
-    try {
-      setIsCheckingLocation(true);
+  /** Update formik lat/lng ketika user klik di peta */
+  const handleMapChange = (lat: number, lng: number) => {
+    formik.setFieldValue("latitude", lat);
+    formik.setFieldValue("longitude", lng);
+    // Tandai field sudah "disentuh" agar validasi error muncul jika perlu
+    formik.setFieldTouched("latitude", true, false);
+    formik.setFieldTouched("longitude", true, false);
+  };
 
-      // Validasi field yang diperlukan
-      const hasManualCoordinates =
-        formik.values.latitude && formik.values.longitude;
-      const hasAddress = formik.values.address.length >= 10;
-
-      if (!hasAddress) {
-        toast.error("Please enter a complete address (minimum 10 characters)");
-        return;
-      }
-
-      if (
-        !hasManualCoordinates &&
-        (!formik.values.province || !formik.values.city)
-      ) {
-        toast.error(
-          "Province and City are required when coordinates are not provided",
-        );
-        return;
-      }
-
-      // Call check-location endpoint
-      const response = await outletService.checkLocation({
-        province: formik.values.province || undefined,
-        city: formik.values.city || undefined,
-        address: formik.values.address,
-        latitude: formik.values.latitude
-          ? Number(formik.values.latitude)
-          : undefined,
-        longitude: formik.values.longitude
-          ? Number(formik.values.longitude)
-          : undefined,
-      });
-
-      if (response.success) {
-        setLocationPreview(response.data);
-        setShowMapPreview(true);
-
-        // Update form values dengan hasil geocoding
-        formik.setFieldValue("latitude", response.data.latitude);
-        formik.setFieldValue("longitude", response.data.longitude);
-        formik.setFieldValue("address", response.data.formattedAddress);
-
-        toast.success("Location verified successfully");
-      }
-    } catch (error: any) {
-      console.error("Check location error:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to check location";
-      toast.error(errorMessage);
-    } finally {
-      setIsCheckingLocation(false);
+  /** Gunakan Geolocation API browser untuk set posisi awal marker */
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Browser does not support geolocation");
+      return;
     }
-  };
 
-  const handleClearPreview = () => {
-    setLocationPreview(null);
-    setShowMapPreview(false);
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        handleMapChange(position.coords.latitude, position.coords.longitude);
+        setIsLocating(false);
+        toast.success("Location detected successfully");
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        toast.error("Failed to detect location. Please click on the map.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
   };
-
-  const handleAddressChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    formik.handleChange(e);
-    // Reset preview jika address berubah
-    if (showMapPreview) {
-      setShowMapPreview(false);
-      setLocationPreview(null);
-    }
-  };
-
-  const handleCoordinatesChange =
-    (field: "latitude" | "longitude") =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      formik.handleChange(e);
-      // Reset preview jika coordinates berubah
-      if (showMapPreview) {
-        setShowMapPreview(false);
-        setLocationPreview(null);
-      }
-    };
 
   return {
     formik,
-    locationPreview,
-    isCheckingLocation,
-    showMapPreview,
-    handleCheckLocation,
-    handleClearPreview,
-    handleAddressChange,
-    handleCoordinatesChange,
+    isLocating,
+    handleGetCurrentLocation,
+    handleMapChange,
   };
 };

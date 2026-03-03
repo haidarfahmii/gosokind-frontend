@@ -27,7 +27,7 @@ import {
   ShoppingBag,
   Store,
 } from "lucide-react";
-import { Outlet } from "../types";
+import { Outlet } from "@/features/super-admin/outlet/types";
 import Pagination from "@/components/shared/Pagination";
 import {
   DeleteConfirmDialog,
@@ -167,15 +167,17 @@ export function OutletTable({
 
                     {/* Location */}
                     <TableCell>
-                      <div className="flex items-start gap-2 max-w-xs">
+                      <div className="flex items-start gap-2 max-w-50 sm:max-w-xs">
                         <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-slate-400" />
-                        <div className="text-sm text-slate-600">
+                        <div className="flex-1 min-w-0 text-sm text-slate-600">
                           {outlet.province && outlet.city && (
-                            <p className="text-xs text-slate-500 font-medium">
+                            <p className="text-xs text-slate-500 font-medium truncate">
                               {outlet.city}, {outlet.province}
                             </p>
                           )}
-                          <span className="line-clamp-2">{outlet.address}</span>
+                          <p className="whitespace-normal wrap-break-words leading-relaxed mt-0.5">
+                            {outlet.address}
+                          </p>
                         </div>
                       </div>
                     </TableCell>

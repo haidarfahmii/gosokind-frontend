@@ -20,11 +20,14 @@ export interface Outlet {
   orderCount?: number;
 }
 
-export interface OutletWithGeocoding extends Outlet {
-  geocoding?: {
-    source: "manual" | "opencage";
-    usedManualCoordinates: boolean;
-  };
+export interface OutletFormValues {
+  name: string;
+  province: string;
+  city: string;
+  status: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface CreateOutletInput {
@@ -32,8 +35,9 @@ export interface CreateOutletInput {
   province?: string;
   city?: string;
   address: string;
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
+  status?: OutletStatus;
 }
 
 export interface UpdateOutletInput {
@@ -44,6 +48,7 @@ export interface UpdateOutletInput {
   address?: string;
   latitude?: number;
   longitude?: number;
+  status?: OutletStatus;
 }
 
 export interface OutletListResponse {
@@ -64,51 +69,10 @@ export interface OutletResponse {
   data: Outlet;
 }
 
-export interface OutletWithGeocodingResponse {
-  success: boolean;
-  message: string;
-  data: OutletWithGeocoding;
-}
-
-export interface CheckLocationInput {
-  province?: string;
-  city?: string;
-  address: string;
-  latitude?: number;
-  longitude?: number;
-}
-
-export interface CheckLocationResult {
-  latitude: number;
-  longitude: number;
-  formattedAddress: string;
-  source: "manual" | "opencage";
-  preview: {
-    willUse: string;
-    message: string;
-  };
-}
-
-export interface CheckLocationResponse {
-  success: boolean;
-  message: string;
-  data: CheckLocationResult;
-}
-
 export interface OutletListQuery {
   page?: number;
   limit?: number;
   search?: string;
-}
-
-export interface OutletFormValues {
-  name: string;
-  province: string;
-  city: string;
-  status: string;
-  address: string;
-  latitude: number | "";
-  longitude: number | "";
 }
 
 export interface OutletStats {

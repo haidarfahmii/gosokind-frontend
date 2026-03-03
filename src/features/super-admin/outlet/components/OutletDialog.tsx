@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Outlet } from "../types";
-import { OutletForm } from "./OutletForm";
-import { useOutletForm } from "../hooks/useOutletForm";
+import { Outlet } from "@/features/super-admin/outlet/types";
+import { OutletForm } from "@/features/super-admin/outlet/components/OutletForm";
+import { useOutletForm } from "@/features/super-admin/outlet/hooks/useOutletForm";
 
 interface OutletDialogProps {
   open: boolean;
@@ -25,39 +25,35 @@ export function OutletDialog({
   selectedOutlet,
   onSuccess,
 }: OutletDialogProps) {
+  const isEditMode = !!selectedOutlet;
+
   const formContext = useOutletForm({
     initialData: selectedOutlet,
     onSuccess: () => {
       onSuccess();
       onOpenChange(false);
-      // Formik reset otomatis terjadi jika component useOutletForm di set demikian,
-      // atau bisa panggil formContext.formik.resetForm() disini jika perlu.
     },
   });
 
-  const isEditMode = !!selectedOutlet;
-
-  const handleManualCancel = () => {
-    formContext.formik.resetForm(); // Hapus data ketikan
-    onOpenChange(false); // Tutup dialog
-  };
-
-  const handleOpenChange = (isOpen: boolean) => {
-    onOpenChange(isOpen);
-  };
-
-  const handleSuccess = () => {
-    onSuccess();
+  const handleCancel = () => {
+    formContext.formik.resetForm();
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        // Reset form saat dialog ditutup
+        if (!isOpen) formContext.formik.resetForm();
+        onOpenChange(isOpen);
+      }}
+    >
       <DialogContent
-        className="sm:max-w-125 max-h-[90vh] overflow-y-auto"
-        // Cegah interaksi luar menutup dialog jika sedang submit
+        className="sm:max-w-lg max-h-[90vh] overflow-y-auto"
+        // Cegah klik luar menutup dialog jika sedang submit
         onInteractOutside={(e) => {
-          e.preventDefault();
+          if (formContext.formik.isSubmitting) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -67,15 +63,15 @@ export function OutletDialog({
           </DialogTitle>
           <DialogDescription>
             {isEditMode
-              ? "Update outlet information and location"
-              : "Enter outlet details and verify location on map"}
+              ? "Update outlet information. Click the map to change location."
+              : "Fill in outlet details and click the map to set the location."}
           </DialogDescription>
         </DialogHeader>
 
         <OutletForm
           formContext={formContext}
           isEditMode={isEditMode}
-          onCancel={handleManualCancel}
+          onCancel={handleCancel}
         />
       </DialogContent>
     </Dialog>

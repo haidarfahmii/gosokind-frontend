@@ -32,7 +32,6 @@ export const useCreateOrderForm = ({ onSuccess }: UseCreateOrderFormProps) => {
                     addressId: values.addressId,
                     pickupAt: isoPickupAt,
                 });
-                console.log(values)
 
                 toast.success("Pesanan berhasil dibuat!");
                 resetForm();

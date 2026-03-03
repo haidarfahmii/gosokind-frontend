@@ -1,12 +1,12 @@
-// src/features/orders/components/CreateOrderModal.tsx
 "use client";
 
-import { useEffect } from "react"; // <-- Import useEffect
+import { useEffect, useMemo } from "react"; // [!IMPORT useMemo]
 import { FiX, FiClock, FiMapPin } from "react-icons/fi";
 import { Button } from "@/features/auth/components/ui/button";
 import { Label } from "@/features/auth/components/ui/label";
 import { useCreateOrderForm } from "../hooks/useCreateOrderForm";
 import { cn } from "@/lib/utils";
+import { TimePickerWheel } from "@/components/ui/time-picker-wheel";
 
 interface CreateOrderModalProps {
     isOpen: boolean;
@@ -14,9 +14,10 @@ interface CreateOrderModalProps {
     addresses: any[];
 }
 
-// Fungsi pembantu untuk membuat opsi jam kelipatan 30 menit (08:00 - 20:00)
+// Pindahkan helper function ke luar komponen agar tidak dibuat ulang
 const generateTimeSlots = () => {
     const slots = [];
+    slots.push("Sekarang");
     for (let i = 8; i <= 20; i++) {
         slots.push(`${i.toString().padStart(2, "0")}:00`);
         if (i !== 20) {
@@ -31,32 +32,26 @@ export default function CreateOrderModal({ isOpen, onClose, addresses }: CreateO
         onSuccess: onClose,
     });
 
-    const timeSlots = generateTimeSlots();
+    const timeSlots = useMemo(() => generateTimeSlots(), []);
 
-    // --- Efek untuk set default alamat (Primary) ketika modal dibuka ---
     useEffect(() => {
-        // Cek jika modal terbuka, ada data alamat, dan belum ada alamat yang dipilih di formik
         if (isOpen && addresses.length > 0 && !formik.values.addressId) {
             const primaryAddress = addresses.find((addr) => addr.isPrimary);
-
             if (primaryAddress) {
-                // Set ID alamat utama sebagai default
                 formik.setFieldValue("addressId", primaryAddress.id);
             } else {
-                // Jika user tidak punya alamat utama, jadikan alamat list pertama sebagai default opsional
                 formik.setFieldValue("addressId", addresses[0].id);
             }
         }
+
     }, [isOpen, addresses, formik]);
-    // ------------------------------------------------------------------
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+            <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
 
-                {/* Header Modal */}
                 <div className="flex justify-between items-center mb-6 border-b border-slate-50 pb-4">
                     <div>
                         <h2 className="text-xl font-bold text-slate-900">Buat Pesanan Baru</h2>
@@ -67,76 +62,80 @@ export default function CreateOrderModal({ isOpen, onClose, addresses }: CreateO
                     </button>
                 </div>
 
-                {/* Formik Form */}
-                <form onSubmit={formik.handleSubmit} className="space-y-5">
-
+                <form onSubmit={formik.handleSubmit} className="space-y-6">
                     {/* Input Alamat */}
-                    <div className="space-y-2">
-                        <Label htmlFor="addressId" className="flex items-center gap-2">
+                    <div className="space-y-3">
+                        <Label htmlFor="addressId" className="flex items-center gap-2 text-base">
                             <FiMapPin className="text-blue-500" /> Pilih Alamat Penjemputan
                         </Label>
                         {addresses.length === 0 ? (
                             <div className="p-3 bg-red-50 text-red-500 text-sm rounded-xl border border-red-100">
-                                Anda belum memiliki alamat tersimpan. Silakan tambah alamat di menu profil.
+                                Anda belum memiliki alamat tersimpan.
                             </div>
                         ) : (
-                            <select
-                                id="addressId"
-                                name="addressId"
-                                value={formik.values.addressId}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={cn(
-                                    "w-full px-4 py-3.5 bg-slate-50 border rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer",
-                                    formik.touched.addressId && formik.errors.addressId ? "border-red-500" : "border-slate-200"
-                                )}
-                            >
-                                <option value="" disabled>-- Pilih Alamat --</option>
-                                {addresses.map((addr) => (
-                                    <option key={addr.id} value={addr.id}>
-                                        {addr.isPrimary ? "(Utama)" : ""} {addr.label}  - {addr.address.substring(0, 30)}...
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <select
+                                    id="addressId"
+                                    name="addressId"
+                                    value={formik.values.addressId}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={cn(
+                                        "w-full px-4 py-4 bg-slate-50 border rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-sm font-medium",
+                                        formik.touched.addressId && formik.errors.addressId ? "border-red-500" : "border-slate-200"
+                                    )}
+                                >
+                                    <option value="" disabled>-- Pilih Alamat --</option>
+                                    {addresses.map((addr) => (
+                                        <option key={addr.id} value={addr.id}>
+                                            {addr.isPrimary ? "(Utama)" : ""} {addr.label} - {addr.address.substring(0, 25)}...
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
                         )}
                         {formik.touched.addressId && formik.errors.addressId && (
                             <p className="text-xs text-red-500">{formik.errors.addressId}</p>
                         )}
                     </div>
 
-                    {/* Input Jam Penjemputan */}
-                    <div className="space-y-2">
-                        <Label htmlFor="pickupAt" className="flex items-center gap-2">
+                    {/* Input Jam (Wheel) */}
+                    <div className="space-y-3">
+                        <Label htmlFor="pickupAt" className="flex items-center gap-2 text-base">
                             <FiClock className="text-blue-500" /> Jam Penjemputan (Hari Ini)
                         </Label>
-                        <select
-                            id="pickupAt"
-                            name="pickupAt"
-                            value={formik.values.pickupAt}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            className={cn(
-                                "w-full px-4 py-3.5 bg-slate-50 border rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer",
-                                formik.touched.pickupAt && formik.errors.pickupAt ? "border-red-500" : "border-slate-200"
-                            )}
-                        >
-                            <option value="">Sekarang</option>
-                            {timeSlots.map((time) => (
-                                <option key={time} value={time}>
-                                    {time} WIB
-                                </option>
-                            ))}
-                        </select>
+
+                        <TimePickerWheel
+                            options={timeSlots}
+                            value={formik.values.pickupAt || "Sekarang"}
+                            onChange={(val) => {
+                                const backendVal = val === "Sekarang" ? "" : val;
+                                formik.setFieldValue("pickupAt", backendVal);
+                            }}
+                        />
+
                         {formik.touched.pickupAt && formik.errors.pickupAt && (
-                            <p className="text-xs text-red-500">{formik.errors.pickupAt}</p>
+                            <div className="p-3 bg-red-50 text-red-600 text-xs rounded-lg flex items-center gap-2">
+                                <span className="font-bold">!</span> {formik.errors.pickupAt}
+                            </div>
                         )}
+
+                        <p className="text-center text-xs text-slate-400 mt-2">
+                            {formik.values.pickupAt && formik.values.pickupAt !== "Sekarang"
+                                ? `Kurir akanmenjemput sekitar pukul ${formik.values.pickupAt} WIB`
+                                : "Kurir akan menjemput secepatnya (Estimasi 30-60 menit)"}
+                        </p>
                     </div>
 
-                    {/* Submit Button */}
                     <div className="pt-4">
                         <Button
                             type="submit"
-                            className="w-full h-12 text-base rounded-xl"
+                            className="w-full h-14 text-base font-bold rounded-2xl shadow-xl shadow-blue-600/20"
                             disabled={isLoading || addresses.length === 0}
                         >
                             {isLoading ? "Memproses..." : "Konfirmasi Penjemputan"}

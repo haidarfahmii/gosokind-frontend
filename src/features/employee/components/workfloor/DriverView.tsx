@@ -3,6 +3,7 @@
 import { Truck, History } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import DriverJobCard from "@/features/employee/components/workfloor/DriverJobCard";
+import DriverHistoryCard from "@/features/employee/components/workfloor/DriverHistoryCard";
 import {
   NotificationCenter,
   Notification,
@@ -119,7 +120,7 @@ export default function DriverView({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {historyJobs.length > 0 ? (
               historyJobs.map((job) => (
-                <DriverJobCard key={job.id} job={job} onAccept={() => {}} />
+                <DriverHistoryCard key={job.id} job={job} />
               ))
             ) : (
               <div className="col-span-full">

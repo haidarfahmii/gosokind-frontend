@@ -9,6 +9,7 @@ import Link from "next/link";
 import axiosInstance from "@/utils/axiosInstance";
 import CreateOrderModal from "@/features/orders/components/CreateOrderModal";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge"; // Sesuaikan path jika berbeda
+import Image from "next/image";
 
 export default function HomePage() {
     const { data: session } = useSession();
@@ -77,7 +78,14 @@ export default function HomePage() {
                         <Link href="/profile">
                             <div className="w-14 h-14 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl border-2 border-blue-200 overflow-hidden shrink-0">
                                 {session?.user?.avatarUrl ? (
-                                    <img src={session.user.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                                    <Image
+                                        src={session.user.avatarUrl}
+                                        alt="User Avatar"
+                                        width={40}
+                                        height={40}
+                                        priority
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
                                 ) : (
                                     <User className="h-9 w-9 text-slate-400" />
                                 )}

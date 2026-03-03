@@ -7,13 +7,12 @@ import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/features/auth/components/ui/button";
 import { FaTshirt } from "react-icons/fa";
 import { User } from "lucide-react";
+import Image from "next/image";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-
     const { data: session, status } = useSession();
-
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -21,7 +20,6 @@ export default function Navbar() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
-
     const navLinks = [
         { name: "Beranda", href: "/" },
         { name: "Layanan", href: "#services" },
@@ -76,7 +74,14 @@ export default function Navbar() {
                                     <Link href={"/profile"}>
                                         <div className="w-9 h-9 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl border-2 border-blue-200 overflow-hidden shrink-0">
                                             {session?.user?.avatarUrl ? (
-                                                <img src={session.user.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={session.user.avatarUrl}
+                                                    alt="User Avatar"
+                                                    width={40}
+                                                    height={40}
+                                                    priority
+                                                    className="w-full h-full rounded-full object-cover"
+                                                />
                                             ) : (
                                                 <User className="h-5 w-5 text-slate-400" />
                                             )}
@@ -143,7 +148,14 @@ export default function Navbar() {
                                 <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-white/5">
                                     <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
                                         {session?.user?.avatarUrl ? (
-                                            <img src={session.user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                            <Image
+                                                src={session.user.avatarUrl}
+                                                alt="User Avatar"
+                                                width={40}
+                                                height={40}
+                                                priority
+                                                className="w-full h-full rounded-full object-cover"
+                                            />
                                         ) : (
                                             <FiUser className="text-slate-400" />
                                         )}

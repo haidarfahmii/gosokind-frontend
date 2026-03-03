@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import Link from "next/link";
 import { User } from "lucide-react";
+import Image from "next/image";
 
 export default function ProfilePage() {
     const { data: session } = useSession();
@@ -36,10 +37,13 @@ export default function ProfilePage() {
                         {/* Avatar */}
                         <div className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-2xl border-4 border-gray-200 shadow-sm overflow-hidden shrink-0">
                             {session?.user?.avatarUrl ? (
-                                <img
+                                <Image
                                     src={session.user.avatarUrl}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
+                                    alt="User Avatar"
+                                    width={40}
+                                    height={40}
+                                    priority
+                                    className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
                                 <User className="h-12 w-12 text-slate-400" />

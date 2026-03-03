@@ -46,6 +46,15 @@ export default function WorkfloorPage() {
   const userId = session?.user?.id || "";
 
   const [activeTab, setActiveTab] = useState<"active" | "history">("active");
+  const [page, setPage] = useState<number>(1);
+  const [sortBy, setSortBy] = useState<string>("desc");
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+
+  // Reset page when switching tabs or changing filters
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, sortBy, timeFilter]);
+
   const [bypassData, setBypassData] = useState<{
     isOpen: boolean;
     orderId: string;
@@ -63,18 +72,31 @@ export default function WorkfloorPage() {
     (role === "SUPER_ADMIN" || role === "OUTLET_ADMIN" ? "WASHING" : "WASHING");
 
   // ── React Query hooks ────────────────────────────────────────────────────
-  const { data: driverJobs = [], isLoading: isDriverJobsLoading } =
-    useAvailableJobs(!!isDriver);
+  // ── React Query hooks ────────────────────────────────────────────────────
+  const { data: driverJobsResponse, isLoading: isDriverJobsLoading } =
+    useAvailableJobs(page, 10, sortBy, timeFilter, !!isDriver && activeTab === "active");
+  const driverJobs = driverJobsResponse?.data || [];
+  const driverActiveMeta = driverJobsResponse?.meta || { lastPage: 1 };
+
   const { data: activeDriverJob = null, isLoading: isActiveJobLoading } =
     useActiveJob(!!isDriver);
-  const { data: historyJobs = [] } = useDriverHistory(
-    !!isDriver && activeTab === "history",
+  
+  const { data: historyJobsResponse } = useDriverHistory(
+    page, 10, sortBy, timeFilter, !!isDriver && activeTab === "history"
   );
-  const { data: workerHistory = [] } = useWorkerHistory(
-    !isDriver && activeTab === "history",
+  const historyJobs = historyJobsResponse?.data || [];
+  const driverHistoryMeta = historyJobsResponse?.meta || { lastPage: 1 };
+
+  const { data: workerHistoryResponse } = useWorkerHistory(
+    page, 10, sortBy, timeFilter, !isDriver && activeTab === "history"
   );
-  const { data: stationOrders = [], isLoading: isStationOrdersLoading } =
-    useStationOrders(isDriver ? null : effectiveStation);
+  const workerHistory = workerHistoryResponse?.data || [];
+  const workerHistoryMeta = workerHistoryResponse?.meta || { lastPage: 1 };
+
+  const { data: stationOrdersResponse, isLoading: isStationOrdersLoading } =
+    useStationOrders(isDriver ? null : effectiveStation, page, 10, sortBy, timeFilter);
+  const stationOrders = stationOrdersResponse?.data || [];
+  const workerActiveMeta = stationOrdersResponse?.meta || { lastPage: 1 };
 
   const { mutate: processOrderMutate } = useProcessOrder();
   const { mutate: acceptJobMutate } = useAcceptJob();
@@ -275,30 +297,46 @@ export default function WorkfloorPage() {
         {isLoading ? (
           <WorkfloorSkeleton />
         ) : isDriver ? (
-          <DriverView
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            driverJobs={driverJobs}
-            activeJob={activeDriverJob}
-            historyJobs={historyJobs}
-            onAccept={handleAcceptJob}
-            onComplete={handleCompleteJob}
-            notifications={notifications}
-            onMarkAsRead={handleMarkAsRead}
-            onClearAll={handleClearNotifications}
-          />
-        ) : (
-          <WorkerView
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            stationOrders={stationOrders}
-            workerHistory={workerHistory}
-            effectiveStation={effectiveStation}
-            onProcess={handleProcess}
-            notifications={notifications}
-            onMarkAsRead={handleMarkAsRead}
-            onClearAll={handleClearNotifications}
-          />
+            <DriverView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              driverJobs={driverJobs}
+              activeJob={activeDriverJob}
+              historyJobs={historyJobs}
+              onAccept={handleAcceptJob}
+              onComplete={handleCompleteJob}
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onClearAll={handleClearNotifications}
+              // Pagination & Filters
+              page={page}
+              setPage={setPage}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              timeFilter={timeFilter}
+              setTimeFilter={setTimeFilter}
+              lastPage={activeTab === "active" ? driverActiveMeta.lastPage : driverHistoryMeta.lastPage}
+            />
+          ) : (
+            <WorkerView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              stationOrders={stationOrders}
+              workerHistory={workerHistory}
+              effectiveStation={effectiveStation}
+              onProcess={handleProcess}
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onClearAll={handleClearNotifications}
+              // Pagination & Filters
+              page={page}
+              setPage={setPage}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              timeFilter={timeFilter}
+              setTimeFilter={setTimeFilter}
+              lastPage={activeTab === "active" ? workerActiveMeta.lastPage : workerHistoryMeta.lastPage}
+            />
         )}
 
         <BypassModal

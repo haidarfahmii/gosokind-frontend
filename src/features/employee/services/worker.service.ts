@@ -29,12 +29,19 @@ const mapDtoToStationOrder = (dto: StationOrderDTO): StationOrder => ({
 // API Calls
 export const getStationOrders = async (
   station: StationType,
-): Promise<StationOrder[]> => {
-  const { data } = await axiosInstance.get<{ data: StationOrderDTO[] }>(
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "asc",
+  timeFilter: string = "all"
+): Promise<{ data: StationOrder[]; meta: any }> => {
+  const { data } = await axiosInstance.get<{ data: StationOrderDTO[]; meta: any }>(
     `${WORKER_ENDPOINT}/orders`,
-    { params: { station } },
+    { params: { station, page, limit, sortBy, timeFilter } },
   );
-  return data.data.map(mapDtoToStationOrder);
+  return {
+    data: data.data.map(mapDtoToStationOrder),
+    meta: data.meta
+  };
 };
 
 export const processOrder = async (payload: ProcessPayload): Promise<void> => {
@@ -55,23 +62,32 @@ export const requestBypass = async (payload: BypassPayload): Promise<void> => {
   });
 };
 
-export const getWorkerHistory = async (): Promise<WorkerHistoryItem[]> => {
-  const { data } = await axiosInstance.get<{ data: WorkerHistoryDTO[] }>(
+export const getWorkerHistory = async (
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "desc",
+  timeFilter: string = "all"
+): Promise<{ data: WorkerHistoryItem[]; meta: any }> => {
+  const { data } = await axiosInstance.get<{ data: WorkerHistoryDTO[]; meta: any }>(
     `${WORKER_ENDPOINT}/history`,
+    { params: { page, limit, sortBy, timeFilter } }
   );
-  return data.data.map((dto) => ({
-    id: dto.id,
-    orderNumber: dto.order.orderNumber,
-    items: dto.order.orderItems
-      .map((i) => `${i.quantity} ${i.laundryItem.name}`)
-      .join(", "),
-    date:
-      new Date(dto.completedAt).toLocaleDateString("id-ID") +
-      " " +
-      new Date(dto.completedAt).toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    status: dto.order.status.replace(/_/g, " "),
-  }));
+  return {
+    data: data.data.map((dto) => ({
+      id: dto.id,
+      orderNumber: dto.order.orderNumber,
+      items: dto.order.orderItems
+        .map((i) => `${i.quantity} ${i.laundryItem.name}`)
+        .join(", "),
+      date:
+        new Date(dto.completedAt).toLocaleDateString("id-ID") +
+        " " +
+        new Date(dto.completedAt).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      status: dto.order.status.replace(/_/g, " "),
+    })),
+    meta: data.meta
+  };
 };

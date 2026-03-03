@@ -9,15 +9,21 @@ import {
 
 export const driverKeys = {
   all: ["driver"] as const,
-  available: () => [...driverKeys.all, "available"] as const,
+  available: (params?: any) => [...driverKeys.all, "available", params] as const,
   active: () => [...driverKeys.all, "active"] as const,
-  history: () => [...driverKeys.all, "history"] as const,
+  history: (params?: any) => [...driverKeys.all, "history", params] as const,
 };
 
-export function useAvailableJobs(enabled: boolean = true) {
+export function useAvailableJobs(
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "asc",
+  timeFilter: string = "all",
+  enabled: boolean = true
+) {
   return useQuery({
-    queryKey: driverKeys.available(),
-    queryFn: getAvailableJobs,
+    queryKey: driverKeys.available({ page, limit, sortBy, timeFilter }),
+    queryFn: () => getAvailableJobs(page, limit, sortBy, timeFilter),
     staleTime: 1000 * 30, // 30 seconds
     enabled,
   });
@@ -55,10 +61,16 @@ export function useCompleteJob() {
   });
 }
 
-export function useDriverHistory(enabled: boolean = true) {
+export function useDriverHistory(
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "desc",
+  timeFilter: string = "all",
+  enabled: boolean = true
+) {
   return useQuery({
-    queryKey: driverKeys.history(),
-    queryFn: getDriverHistory,
+    queryKey: driverKeys.history({ page, limit, sortBy, timeFilter }),
+    queryFn: () => getDriverHistory(page, limit, sortBy, timeFilter),
     staleTime: 1000 * 60 * 5,
     enabled,
   });

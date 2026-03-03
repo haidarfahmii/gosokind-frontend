@@ -15,6 +15,8 @@ import axiosInstance from "@/utils/axiosInstance";
 import { toast } from "react-toastify";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge";
 import { Loader2 } from "lucide-react";
+import { usePayment } from "@/features/orders/hooks/usePayment";
+import { Button } from "@/features/auth/components/ui/button";
 
 const formatCurrency = (amount: number | null | undefined) => {
     if (amount === null || amount === undefined) return "-";
@@ -40,6 +42,7 @@ export default function OrderDetailPage() {
 
     const [order, setOrder] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { handlePayment, isLoading: isPaymentLoading } = usePayment();
 
     useEffect(() => {
         const fetchOrderDetail = async () => {
@@ -188,10 +191,13 @@ export default function OrderDetailPage() {
 
                             {/* ACTION BUTTON JIKA STATUS BUTUH PEMBAYARAN */}
                             {order.status === "WAITING_FOR_PAYMENT" && (
-                                <button className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-6">
-                                    <FiCheckCircle size={20} />
-                                    Bayar Sekarang
-                                </button>
+                                <Button
+                                    onClick={() => handlePayment(order.id)}
+                                    disabled={isLoading}
+                                    className="w-full sm:w-auto"
+                                >
+                                    {isPaymentLoading ? "Memproses..." : "Bayar Sekarang"}
+                                </Button>
                             )}
                         </>
                     )}

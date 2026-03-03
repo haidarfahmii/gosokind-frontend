@@ -105,7 +105,7 @@ const nextAuthHandler = NextAuth({
         token.email = user?.email;
         token.role = user?.role;
         token.name = user?.name;
-        // token.avatarUrl = user.avatarUrl! || user.image!;
+        token.avatarUrl = user?.avatarUrl;
 
         if (account?.provider === "google") {
           token.accessToken = user.accessToken;

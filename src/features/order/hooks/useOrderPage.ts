@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { BypassRequest, Order } from "@/features/order/types/order.types";
 import { useOrderList, useBypassRequests } from "@/features/order/hooks";
+import { useOutletFilter } from "@/hooks/useOutletFilter";
 
 export function useOrderPage() {
   const { data: session } = useSession();
@@ -19,11 +20,8 @@ export function useOrderPage() {
     BypassRequest[]
   >([]);
 
-  // Outlets for Super Admin filter
-  const [outlets, setOutlets] = useState<Array<{ id: string; name: string }>>(
-    [],
-  );
-  const [loadingOutlets, setLoadingOutlets] = useState<boolean>(false);
+  const { selectedOutletId, setSelectedOutletId, outlets, loadingOutlets } =
+    useOutletFilter();
 
   // Hooks
   const {
@@ -39,7 +37,7 @@ export function useOrderPage() {
     setStartDate,
     endDate,
     setEndDate,
-    clearFilters,
+    clearFilters: clearLocalFilters,
     pagination,
     handlePageChange,
     handleLimitChange,
@@ -54,32 +52,17 @@ export function useOrderPage() {
     handleBypassRequest,
   } = useBypassRequests(filterOutlet !== "all" ? filterOutlet : undefined);
 
-  // Fetch outlets (Super Admin only)
   useEffect(() => {
-    if (!isSuperAdmin) return;
+    setFilterOutlet(selectedOutletId);
+  }, [selectedOutletId, setFilterOutlet]);
 
-    const fetchOutlets = async () => {
-      try {
-        setLoadingOutlets(true);
-        const response = await fetch("/api/outlets?limit=100");
-        const data = await response.json();
-        if (data.success) {
-          setOutlets(
-            data.data.map((outlet: any) => ({
-              id: outlet.id,
-              name: outlet.name,
-            })),
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch outlets:", error);
-      } finally {
-        setLoadingOutlets(false);
-      }
-    };
-
-    fetchOutlets();
-  }, [isSuperAdmin]);
+  // Clear all filters — termasuk reset global outlet di header
+  const clearFilters = () => {
+    clearLocalFilters();
+    if (isSuperAdmin) {
+      setSelectedOutletId("all");
+    }
+  };
 
   // Order handlers
   const handleViewDetail = (order: Order) => {
@@ -152,6 +135,7 @@ export function useOrderPage() {
     // Outlets
     outlets,
     activeOutletName,
+    loadingOutlets,
 
     // Bypass
     bypassRequests,

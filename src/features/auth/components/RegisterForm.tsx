@@ -5,6 +5,8 @@ import { Button } from "@/features/auth/components/ui/button"; // Asumsi pakai S
 import { Input } from "@/features/auth/components/ui/input";
 import { Label } from "@/features/auth/components/ui/label";
 import { Checkbox } from "./ui/checkbox";
+import { FcGoogle } from "react-icons/fc";
+import { signIn } from "next-auth/react";
 
 export default function RegisterForm() {
   const { formik, isLoading } = useRegisterForm();
@@ -63,6 +65,24 @@ export default function RegisterForm() {
           </Button>
         </div>
       </form>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      <Button
+        variant="outline" // Pastikan Button support variant ini atau sesuaikan style
+        type="button"
+        className="w-full"
+        onClick={() => signIn("google", { callbackUrl: "/home" })}
+      >
+        <FcGoogle className="mr-2 h-4 w-4" />
+        Google
+      </Button>
     </div>
   );
 }

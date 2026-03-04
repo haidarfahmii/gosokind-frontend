@@ -40,8 +40,8 @@ export const useLoginForm = () => {
         }
 
         if (res?.ok) {
-          toast.success("Login berhasil!");
-          router.push("/");
+          toast.success("Login berhasil! Mengalihkan...");
+          router.push("/home");
           router.refresh();
         }
       } catch (error: any) {

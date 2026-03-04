@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { paymentService } from "../services/payment.service";
+import { paymentService } from "../services/order.service";
 import { toast } from "react-toastify";
 
 export const usePayment = () => {

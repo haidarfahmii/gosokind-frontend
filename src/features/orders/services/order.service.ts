@@ -15,3 +15,10 @@ export const paymentService = {
         return response.data;
     },
 };
+
+export const confirmOrderService = {
+    confirmDelivery: async (orderId: string) => {
+        const response = await axiosInstance.patch(`/customer/orders/${orderId}/confirm-delivery`);
+        return response.data;
+    },
+};

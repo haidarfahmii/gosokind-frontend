@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     FiArrowLeft,
@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge";
 import { Loader2 } from "lucide-react";
 import { usePayment } from "@/features/orders/hooks/usePayment";
+import { useConfirmOrder } from "@/features/orders/hooks/useConfirmOrder";
 import { Button } from "@/features/auth/components/ui/button";
 
 const formatCurrency = (amount: number | null | undefined) => {
@@ -44,27 +45,29 @@ export default function OrderDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const { handlePayment, isLoading: isPaymentLoading } = usePayment();
 
-    useEffect(() => {
-        const fetchOrderDetail = async () => {
-            if (!orderNumber) return;
-
-            try {
-                setIsLoading(true);
-                // Endpoint disesuaikan agar menerima orderNumber sebagai parameter
-                const response = await axiosInstance.get(`/customer/orders/number/${orderNumber}`);
-
-                // Asumsi struktur data dari backend: response.data.data
-                setOrder(response.data.data);
-            } catch (error: any) {
-                console.error("Gagal memuat detail pesanan:", error);
-                toast.error(error?.response?.data?.message || "Gagal memuat detail pesanan");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchOrderDetail();
+    const fetchOrderDetail = useCallback(async () => {
+        if (!orderNumber) return;
+        try {
+            // setIsLoading(true); // Opsional: matikan loading penuh jika ingin silent refresh
+            const response = await axiosInstance.get(`/customer/orders/number/${orderNumber}`);
+            setOrder(response.data.data);
+        } catch (error: any) {
+            console.error("Gagal memuat detail pesanan:", error);
+            toast.error(error?.response?.data?.message || "Gagal memuat detail pesanan");
+        } finally {
+            setIsLoading(false);
+        }
     }, [orderNumber]);
+
+    const { handleConfirmOrder, isLoading: isConfirmLoading } = useConfirmOrder({
+        onSuccess: () => {
+            fetchOrderDetail(); // Refresh data pesanan setelah sukses
+        }
+    });
+
+    useEffect(() => {
+        fetchOrderDetail();
+    }, [fetchOrderDetail]);
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] pb-24 font-sans">
@@ -197,6 +200,15 @@ export default function OrderDetailPage() {
                                     className="w-full sm:w-auto"
                                 >
                                     {isPaymentLoading ? "Memproses..." : "Bayar Sekarang"}
+                                </Button>
+                            )}
+                            {order.status === "RECEIVED_BY_CUSTOMER" && (
+                                <Button
+                                    onClick={() => handleConfirmOrder(order.id)}
+                                    disabled={isConfirmLoading || isPaymentLoading}
+                                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 shadow-green-600/20"
+                                >
+                                    {isConfirmLoading ? "Memproses..." : "Selesaikan Pesanan"}
                                 </Button>
                             )}
                         </>

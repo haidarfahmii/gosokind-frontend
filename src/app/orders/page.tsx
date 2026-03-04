@@ -14,28 +14,26 @@ export default function OrdersPage() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
 
-    // Membaca initial state dari URL parameters
     const urlTab = searchParams.get("tab") as "Active" | "Completed" | null;
     const urlPage = searchParams.get("page");
 
     const [activeTab, setActiveTab] = useState<"Active" | "Completed">(urlTab || "Active");
     const [page, setPage] = useState<number>(urlPage ? parseInt(urlPage) : 1);
-    
+
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 5;
 
-    // Fungsi untuk memperbarui URL tanpa me-reload halaman
     const updateUrlParams = (newTab: string, newPage: number) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", newTab);
         params.set("page", newPage.toString());
-        // scroll: false agar posisi scroll tidak kembali ke atas saat ganti halaman URL
-        router.push(`${pathname}?${params.toString()}`, { scroll: false }); 
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
     useEffect(() => {
+        let isMounted = true;
         const fetchOrders = async () => {
             if (!session?.user) return;
             try {
@@ -45,28 +43,31 @@ export default function OrdersPage() {
                     url += `&status=COMPLETED`;
                 }
                 const response = await axiosInstance.get(url);
-                const responseData = response.data.data;
-                const fetchedOrders = responseData?.orders || [];
-                const pagination = responseData?.pagination;
+                if (isMounted) {
+                    const responseData = response.data.data;
+                    const fetchedOrders = responseData?.orders || [];
+                    const pagination = responseData?.pagination;
 
-                setOrders(fetchedOrders);
+                    setOrders(fetchedOrders);
 
-                if (pagination) {
-                    setTotalPages(pagination.totalPages || 1);
+                    if (pagination) {
+                        setTotalPages(pagination.totalPages || 1);
+                    }
+                    updateUrlParams(activeTab, page);
                 }
-                
-                // Sinkronisasi state ke URL setiap kali sukses fetch
-                updateUrlParams(activeTab, page);
-                
             } catch (error) {
                 console.error("Gagal memuat riwayat pesanan:", error);
             } finally {
-                setIsLoading(false);
+                if (isMounted) {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchOrders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => {
+            isMounted = false;
+        };
     }, [session, page, activeTab]);
 
     const handleTabChange = (tab: "Active" | "Completed") => {

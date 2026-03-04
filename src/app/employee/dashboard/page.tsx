@@ -79,8 +79,9 @@ export default function EmployeeDashboardPage() {
 
 // ─── Driver Summary Card ──────────────────────────────────────────────────────
 function DriverSummaryCard() {
-  const { data: availableJobs = [], isLoading: isAvailableLoading } =
-    useAvailableJobs(true);
+  const { data: availableJobsResponse, isLoading: isAvailableLoading } =
+    useAvailableJobs(1, 10, "asc", "all", true);
+  const availableJobs = availableJobsResponse?.data || [];
   const { data: activeJob, isLoading: isActiveLoading } = useActiveJob(true);
 
   const isLoading = isAvailableLoading || isActiveLoading;
@@ -165,7 +166,8 @@ function DriverSummaryCard() {
 
 // ─── Worker Summary Card ──────────────────────────────────────────────────────
 function WorkerSummaryCard({ station }: { station: StationType }) {
-  const { data: stationOrders = [], isLoading } = useStationOrders(station);
+  const { data: stationOrdersResponse, isLoading } = useStationOrders(station);
+  const stationOrders = stationOrdersResponse?.data || [];
 
   const pendingCount = stationOrders.filter((o) => !o.isLocked).length;
   const lockedCount = stationOrders.filter((o) => o.isLocked).length;

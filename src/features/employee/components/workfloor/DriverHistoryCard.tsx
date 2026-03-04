@@ -7,30 +7,18 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Package, Truck, Clock } from "lucide-react";
+import { MapPin, Truck, Clock, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface DriverJobCardProps {
+interface DriverHistoryCardProps {
   job: DriverJob;
-  onAccept: (jobId: string) => void;
-  onComplete?: (jobId: string, type: string) => void;
-  isLoading?: boolean;
 }
 
-export default function DriverJobCard({
-  job,
-  onAccept,
-  onComplete,
-  isLoading,
-}: DriverJobCardProps) {
+export default function DriverHistoryCard({ job }: DriverHistoryCardProps) {
   const isPickup = job.type === "PICKUP";
-  const isInProgress =
-    job.status === "IN_PROGRESS" ||
-    job.status === "PICKUP_ON_THE_WAY" ||
-    job.status === "DELIVERY_ON_THE_WAY";
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-primary/20 overflow-hidden">
+    <Card className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-green-500 overflow-hidden opacity-90">
       <CardHeader className="pb-3 pt-4 px-4 bg-muted/10">
         <div className="flex justify-between items-start">
           <Badge
@@ -39,7 +27,7 @@ export default function DriverJobCard({
               "uppercase text-[10px] sm:text-xs px-2 py-0.5",
               isPickup
                 ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-green-600 hover:bg-green-700 text-white",
+                : "bg-purple-600 hover:bg-purple-700 text-white",
             )}
           >
             {job.type}
@@ -61,10 +49,6 @@ export default function DriverJobCard({
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-dashed">
-          {/* <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Package className="w-3.5 h-3.5 text-blue-500" />
-            <span className="font-medium">{job.itemCount} Items </span>
-          </div> */}
           {job.distance && (
             <div className="flex items-center gap-1.5 text-xs text-gray-500 justify-end">
               <Truck className="w-3.5 h-3.5 text-orange-500" />
@@ -80,18 +64,13 @@ export default function DriverJobCard({
 
       <CardFooter className="px-4 pb-4 pt-1">
         <Button
-          className={cn(
-            "w-full font-semibold shadow-sm",
-            isInProgress ? "bg-green-600 hover:bg-green-700" : "",
-          )}
+          className="w-full font-semibold shadow-sm bg-green-100 text-green-700 hover:bg-green-100 pointer-events-none"
           size="lg"
-          onClick={() => {
-            if (isInProgress && onComplete) onComplete(job.id, job.type);
-            else onAccept(job.id);
-          }}
-          disabled={isLoading}
+          variant="secondary"
+          disabled
         >
-          {isInProgress ? "Complete Job" : "Accept Job"}
+          <CheckCircle className="w-4 h-4 mr-2" />
+          Completed
         </Button>
       </CardFooter>
     </Card>

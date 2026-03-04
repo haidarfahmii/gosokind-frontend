@@ -16,12 +16,23 @@ const mapDtoToJob = (dto: DriverJobDTO): DriverJob => ({
 });
 
 // API Calls
-export const getAvailableJobs = async (): Promise<DriverJob[]> => {
+export const getAvailableJobs = async (
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "asc",
+  timeFilter: string = "all"
+): Promise<{ data: DriverJob[]; meta: any }> => {
   const { data } = await axiosInstance.get<{
     success: boolean;
     data: DriverJobDTO[];
-  }>(`${JOB_ENDPOINT}/available`);
-  return data.data.map(mapDtoToJob);
+    meta: any;
+  }>(`${JOB_ENDPOINT}/available`, {
+    params: { page, limit, sortBy, timeFilter },
+  });
+  return {
+    data: data.data.map(mapDtoToJob),
+    meta: data.meta,
+  };
 };
 
 export const getActiveJob = async (): Promise<DriverJob | null> => {
@@ -43,8 +54,8 @@ export const acceptJob = async (
 ): Promise<void> => {
   let jobType = type;
   if (!jobType) {
-    const jobs = await getAvailableJobs();
-    const target = jobs.find((j) => j.id === jobId);
+    const response = await getAvailableJobs(1, 100);
+    const target = response.data.find((j) => j.id === jobId);
     if (!target) throw new Error("Job not found");
     jobType = target.type;
   }
@@ -66,9 +77,18 @@ export const completeJob = async (
   await axiosInstance.post(endpoint, { orderId: jobId });
 };
 
-export const getDriverHistory = async (): Promise<DriverJob[]> => {
-  const { data } = await axiosInstance.get<{ data: DriverJobDTO[] }>(
+export const getDriverHistory = async (
+  page: number = 1,
+  limit: number = 10,
+  sortBy: string = "desc",
+  timeFilter: string = "all"
+): Promise<{ data: DriverJob[]; meta: any }> => {
+  const { data } = await axiosInstance.get<{ data: DriverJobDTO[]; meta: any }>(
     `${JOB_ENDPOINT}/history`,
+    { params: { page, limit, sortBy, timeFilter } }
   );
-  return data.data.map(mapDtoToJob);
+  return { 
+    data: data.data.map(mapDtoToJob),
+    meta: data.meta
+  };
 };

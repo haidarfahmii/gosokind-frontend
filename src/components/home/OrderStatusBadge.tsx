@@ -8,6 +8,7 @@ interface OrderStatusBadgeProps {
 // Export fungsi helper jika sewaktu-waktu dibutuhkan di luar komponen
 export const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
+        SCHEDULED_FOR_PICKUP: "Menunggu Jadwal",
         WAITING_FOR_PICKUP: "Menunggu Kurir",
         PICKUP_ON_THE_WAY: "Kurir Menuju Lokasi",
         ARRIVED_AT_OUTLET: "Sampai di Outlet",

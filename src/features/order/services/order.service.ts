@@ -6,7 +6,7 @@ import {
   InputOrderDetailsInput,
   HandleBypassRequestInput,
   BypassRequestListResponse,
-} from "../types/order.types";
+} from "@/features/order/types/order.types";
 
 export const orderService = {
   /**

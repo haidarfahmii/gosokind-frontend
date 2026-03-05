@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock } from "lucide-react";
-import { Order } from "../../types/order.types";
+import { Order } from "@/features/order/types/order.types";
 import { format } from "date-fns";
 
 interface StationProcessTimelineProps {

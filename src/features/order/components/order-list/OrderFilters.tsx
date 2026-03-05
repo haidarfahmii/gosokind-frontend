@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { OrderStatus } from "../../types/order.types";
+import { OrderStatus } from "@/features/order/types/order.types";
 
 interface OrderFiltersProps {
   selectedStatus: string;

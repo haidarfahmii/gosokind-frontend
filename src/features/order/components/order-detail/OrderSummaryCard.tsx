@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Weight, DollarSign, Calendar, TruckIcon } from "lucide-react";
-import { Order } from "../../types/order.types";
+import { Package, TruckIcon } from "lucide-react";
+import { Order } from "@/features/order/types/order.types";
 import { format } from "date-fns";
 
 interface OrderSummaryCardProps {
@@ -27,7 +27,6 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p className="text-sm text-slate-600 flex items-center gap-1">
-              {/* <Weight className="w-4 h-4" /> */}
               Total Weight
             </p>
             <p className="font-bold text-lg">
@@ -36,7 +35,6 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
           </div>
           <div>
             <p className="text-sm text-slate-600 flex items-center gap-1">
-              {/* <DollarSign className="w-4 h-4" /> */}
               Total Price
             </p>
             <p className="font-bold text-lg">
@@ -53,7 +51,6 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
           </div>
           <div>
             <p className="text-sm text-slate-600 flex items-center gap-1">
-              {/* <Calendar className="w-4 h-4" /> */}
               Order Date
             </p>
             <p className="font-medium text-sm">

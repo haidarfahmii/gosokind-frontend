@@ -12,6 +12,7 @@ import {
   BypassRequestDialog,
 } from "@/features/order/components";
 import { useOrderPage } from "@/features/order/hooks";
+import { OutletFilterProvider } from "@/contexts/OutletFilterContext";
 
 /**
  * Order Management Page - Reusable for Outlet Admin & Super Admin
@@ -35,7 +36,7 @@ import { useOrderPage } from "@/features/order/hooks";
  *    - Melihat permintaan bypass dari worker.
  *    - Menyetujui atau menolak dengan catatan admin.
  */
-export default function OrderPage() {
+function OrderPageContent() {
   const {
     // Session
     isSuperAdmin,
@@ -190,5 +191,14 @@ export default function OrderPage() {
         onReject={(id, note) => handleBypassAction("REJECTED", id, note)}
       />
     </div>
+  );
+}
+
+// Wrapper default export yang menyediakan OutletFilterProvider
+export default function OrderPage() {
+  return (
+    <OutletFilterProvider>
+      <OrderPageContent />
+    </OutletFilterProvider>
   );
 }

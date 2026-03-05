@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { Order, OrderStatus } from "../types/order.types";
+import { Order, OrderStatus } from "@/features/order/types/order.types";
 import axiosInstance from "@/utils/axiosInstance";
 
 /**

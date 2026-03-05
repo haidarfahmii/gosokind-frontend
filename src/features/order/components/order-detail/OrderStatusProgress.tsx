@@ -11,7 +11,10 @@ import {
   CreditCard,
   Home,
 } from "lucide-react";
-import { OrderStatus, getStatusConfig } from "../../types/order.types";
+import {
+  OrderStatus,
+  getStatusConfig,
+} from "@/features/order/types/order.types";
 import { cn } from "@/lib/utils";
 
 interface OrderStatusProgressProps {

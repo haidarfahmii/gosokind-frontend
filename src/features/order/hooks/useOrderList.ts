@@ -2,8 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
-import { Order, OrderStatus, OrderListQuery } from "../types/order.types";
-import { orderService } from "../services/order.service";
+import {
+  Order,
+  OrderStatus,
+  OrderListQuery,
+} from "@/features/order/types/order.types";
+import { orderService } from "@/features/order/services/order.service";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUrlState } from "@/hooks/useUrlState";
 

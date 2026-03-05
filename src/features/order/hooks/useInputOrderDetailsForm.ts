@@ -1,15 +1,14 @@
 "use client";
 
 import { useFormik } from "formik";
-import { Order } from "../types/order.types";
+import { Order } from "@/features/order/types/order.types";
 import { toast } from "react-toastify";
 import {
   InputOrderDetailsFormValues,
   inputOrderDetailsSchema,
-} from "../schemas/order.schemas";
-import { orderService } from "../services/order.service";
-import { useLaundryItems } from "./useLaundryItems";
-import { useWorkers } from "./useWorkers";
+} from "@/features/order/schemas/order.schemas";
+import { orderService } from "@/features/order/services/order.service";
+import { useLaundryItems } from "@/features/order/hooks/useLaundryItems";
 
 interface UseInputOrderDetailsFormProps {
   order: Order | null;
@@ -34,12 +33,10 @@ export const useInputOrderDetailsForm = ({
   onClose,
 }: UseInputOrderDetailsFormProps) => {
   const { laundryItems, loadingItems } = useLaundryItems(open);
-  // const { workers, loadingWorkers } = useWorkers(open, order?.outlet?.id);
 
   const formik = useFormik<InputOrderDetailsFormValues>({
     initialValues: {
       totalWeight: 0,
-      // workerId: "",
       items: [{ laundryItemId: "", quantity: 1 }],
     },
     validationSchema: inputOrderDetailsSchema,
@@ -107,8 +104,6 @@ export const useInputOrderDetailsForm = ({
     formik,
     laundryItems,
     loadingItems,
-    // workers,
-    // loadingWorkers,
     handleAddItem,
     handleRemoveItem,
     handleItemChange,

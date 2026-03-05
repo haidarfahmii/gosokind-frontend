@@ -14,11 +14,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2, Wrench, ChevronRight, TriangleAlert } from "lucide-react";
-import { Order, OrderStatus } from "../../types/order.types";
+import { Order } from "@/features/order/types/order.types";
 import {
   useAdminOrderStatus,
   StatusAction,
-} from "../../hooks/useAdminOrderStatus";
+} from "@/features/order/hooks/useAdminOrderStatus";
 
 interface AdminStatusControlProps {
   order: Order;

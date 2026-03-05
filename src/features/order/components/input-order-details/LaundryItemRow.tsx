@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
-import { LaundryItem } from "../../hooks/useLaundryItems";
+import { LaundryItem } from "@/features/order/hooks/useLaundryItems";
 
 interface OrderItem {
   laundryItemId: string;

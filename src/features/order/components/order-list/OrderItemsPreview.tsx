@@ -1,5 +1,5 @@
 import { TableCell, TableRow } from "@/components/ui/table";
-import { OrderItem } from "../../types/order.types";
+import { OrderItem } from "@/features/order/types/order.types";
 
 interface OrderItemsPreviewProps {
   items: OrderItem[];

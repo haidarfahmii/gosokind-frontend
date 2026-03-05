@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, MapPin } from "lucide-react";
-import { Order } from "../../types/order.types";
+import { Order } from "@/features/order/types/order.types";
 
 interface CustomerInfoCardProps {
   order: Order;

@@ -9,14 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package } from "lucide-react";
-import { Order } from "../../types/order.types";
-import { useInputOrderDetailsForm } from "../../hooks/useInputOrderDetailsForm";
+import { Order } from "@/features/order/types/order.types";
+import { useInputOrderDetailsForm } from "@/features/order/hooks/useInputOrderDetailsForm";
 import {
   TotalWeightField,
   LaundryItemsList,
   EstimatedPriceCard,
 } from "./index";
-// import { WorkerSelectField } from "./WorkerSelectField";
 
 interface InputOrderDetailsDialogProps {
   open: boolean;
@@ -45,8 +44,6 @@ export function InputOrderDetailsDialog({
     formik,
     laundryItems,
     loadingItems,
-    // workers,
-    // loadingWorkers,
     handleAddItem,
     handleRemoveItem,
     handleItemChange,
@@ -85,17 +82,6 @@ export function InputOrderDetailsDialog({
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
-
-          {/* Worker Select */}
-          {/* <WorkerSelectField
-            value={formik.values.workerId}
-            touched={formik.touched.workerId}
-            error={formik.errors.workerId}
-            workers={workers}
-            loadingWorkers={loadingWorkers}
-            onChange={(value) => formik.setFieldValue("workerId", value)}
-            onBlur={() => formik.setFieldTouched("workerId", true)}
-          /> */}
 
           {/* Laundry Items */}
           <LaundryItemsList

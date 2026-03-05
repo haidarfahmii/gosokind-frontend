@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BypassRequest } from "../types/order.types";
+import { BypassRequest } from "@/features/order/types/order.types";
 import { toast } from "react-toastify";
 
 interface UseBypassRequestReviewProps {

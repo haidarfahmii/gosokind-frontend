@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Truck, MapPin, User } from "lucide-react";
-import { Order } from "../../types/order.types";
+import { Order } from "@/features/order/types/order.types";
 
 interface LogisticsInfoCardProps {
   order: Order;

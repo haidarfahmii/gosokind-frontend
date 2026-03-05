@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { BypassRequest } from "../types/order.types";
-import { orderService } from "../services/order.service";
+import { BypassRequest } from "@/features/order/types/order.types";
+import { orderService } from "@/features/order/services/order.service";
 
 interface PaginationData {
   total: number;

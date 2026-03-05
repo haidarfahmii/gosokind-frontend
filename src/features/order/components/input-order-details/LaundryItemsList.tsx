@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plus, Loader2 } from "lucide-react";
-import { LaundryItem } from "../../hooks/useLaundryItems";
-import { LaundryItemRow } from "./LaundryItemRow";
+import { LaundryItem } from "@/features/order/hooks/useLaundryItems";
+import { LaundryItemRow } from "@/features/order/components/input-order-details/LaundryItemRow";
 
 interface OrderItem {
   laundryItemId: string;

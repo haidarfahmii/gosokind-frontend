@@ -57,7 +57,7 @@ export default function OutletAdminDashboardHeader() {
 
   const handleLogout = async () => {
     try {
-      await signOut({ callbackUrl: "/auth/login" });
+      await signOut({ callbackUrl: "/auth/employee/login" });
     } catch (error) {
       console.error("Logout error:", error);
     }

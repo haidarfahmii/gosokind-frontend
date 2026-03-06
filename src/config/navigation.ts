@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UserRound,
   Store,
   BarChart2,
   Settings,
@@ -43,9 +44,14 @@ export const SIDEBAR_ITEMS: {
           icon: LayoutDashboard,
         },
         {
-          label: "Outlet Management",
+          label: "Outlet",
           href: "/admin/super-admin/outlets",
           icon: Store,
+        },
+        {
+          label: "Customers",
+          href: "/admin/super-admin/customers",
+          icon: UserRound,
         },
         {
           label: "Employees",

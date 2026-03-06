@@ -20,7 +20,7 @@ export const getAvailableJobs = async (
   page: number = 1,
   limit: number = 10,
   sortBy: string = "asc",
-  timeFilter: string = "all"
+  timeFilter: string = "all",
 ): Promise<{ data: DriverJob[]; meta: any }> => {
   const { data } = await axiosInstance.get<{
     success: boolean;
@@ -81,14 +81,14 @@ export const getDriverHistory = async (
   page: number = 1,
   limit: number = 10,
   sortBy: string = "desc",
-  timeFilter: string = "all"
+  timeFilter: string = "all",
 ): Promise<{ data: DriverJob[]; meta: any }> => {
   const { data } = await axiosInstance.get<{ data: DriverJobDTO[]; meta: any }>(
     `${JOB_ENDPOINT}/history`,
-    { params: { page, limit, sortBy, timeFilter } }
+    { params: { page, limit, sortBy, timeFilter } },
   );
-  return { 
+  return {
     data: data.data.map(mapDtoToJob),
-    meta: data.meta
+    meta: data.meta,
   };
 };

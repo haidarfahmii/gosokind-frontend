@@ -32,7 +32,7 @@ export default function EmployeeLayout({
     );
   }
 
-  const handleLogout = () => signOut({ callbackUrl: "/auth/login" });
+  const handleLogout = () => signOut({ callbackUrl: "/auth/employee/login" });
 
   const navItems = [
     { href: "/employee/dashboard", label: "Dashboard", icon: Home },

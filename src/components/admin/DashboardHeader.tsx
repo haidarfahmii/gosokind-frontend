@@ -204,7 +204,9 @@ export default function DashboardHeader() {
                 {/* Logout Button */}
                 <div className="border-t border-slate-100 px-2 pt-2">
                   <button
-                    onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                    onClick={() =>
+                      signOut({ callbackUrl: "/auth/employee/login" })
+                    }
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left font-medium"
                   >
                     <LogOut size={16} />

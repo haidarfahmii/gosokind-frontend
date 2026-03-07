@@ -30,6 +30,7 @@ export interface User {
   phoneNumber?: string;
   birthDate?: string;
   avatarUrl?: string;
+  provider: string;
 }
 
 export interface AuthResponse {

@@ -63,6 +63,7 @@ const nextAuthHandler = NextAuth({
               role: user.role,
               accessToken: token,
               avatarUrl: user.avatarUrl,
+              provider: user.provider
             };
           }
           return null;
@@ -125,6 +126,7 @@ const nextAuthHandler = NextAuth({
               role: user.role,
               accessToken: token,
               avatarUrl: user.avatarUrl,
+              provider: user.provider ?? "employee",
             };
           }
 
@@ -209,6 +211,10 @@ const nextAuthHandler = NextAuth({
         }
       }
 
+      if (account) {
+        token.provider = account.provider;
+      }
+
       return token;
     },
 
@@ -220,6 +226,10 @@ const nextAuthHandler = NextAuth({
         session.user.accessToken = token.accessToken;
         session.user.name = token.name;
         session.user.avatarUrl = token.avatarUrl;
+      }
+
+      if (session.user) {
+        (session.user as any).provider = token.provider;
       }
 
       return session;

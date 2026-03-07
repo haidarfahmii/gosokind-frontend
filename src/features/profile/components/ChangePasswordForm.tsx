@@ -1,4 +1,3 @@
-// src/features/profile/components/ChangePasswordForm.tsx
 "use client";
 
 import { Button } from "@/features/auth/components/ui/button";
@@ -6,15 +5,36 @@ import { Input } from "@/features/auth/components/ui/input";
 import { Label } from "@/features/auth/components/ui/label";
 import { useChangePasswordForm } from "../hooks/useChangePasswordForm";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react"; // Pastikan sudah install lucide-react
+import { useSession } from "next-auth/react";
+import { Eye, EyeOff, ShieldAlert } from "lucide-react"; // Pastikan sudah install lucide-react
+
 
 export default function ChangePasswordForm() {
     const { formik, isLoading } = useChangePasswordForm();
+    const { data: session } = useSession();
 
     // State untuk toggle visibility password
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const isSocialLogin = session?.user?.provider === "google";
+
+    if (isSocialLogin) {
+        return (
+            <div className="bg-blue-50 border border-blue-100 p-6 rounded-xl flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                    <ShieldAlert size={24} />
+                </div>
+                <div>
+                    <h3 className="text-base font-semibold text-blue-900">Login via Google Aktif</h3>
+                    <p className="text-sm text-blue-600 mt-1">
+                        Anda masuk menggunakan akun sosial. Kata sandi tidak diperlukan dan tidak dapat diubah untuk akun ini.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={formik.handleSubmit} className="space-y-6">

@@ -88,6 +88,7 @@ export interface EmployeeLoginResponse {
       avatarUrl?: string;
       outletId?: string;
       outletName?: string;
+      provider: string;
     };
   };
 }

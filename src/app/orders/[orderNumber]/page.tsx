@@ -7,8 +7,6 @@ import {
     FiPackage,
     FiMapPin,
     FiClock,
-    FiCheckCircle,
-    FiLoader,
     FiFileText
 } from "react-icons/fi";
 import axiosInstance from "@/utils/axiosInstance";

@@ -1,4 +1,3 @@
-// src/features/profile/components/UpdateProfileForm.tsx
 "use client";
 
 import { Button } from "@/features/auth/components/ui/button";

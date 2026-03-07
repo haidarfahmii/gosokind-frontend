@@ -8,6 +8,7 @@ import { CustomerFilters } from "@/features/super-admin/customer/components/Cust
 import { CustomerTable } from "@/features/super-admin/customer/components/CustomerTable";
 import { CustomerStatsCards } from "@/features/super-admin/customer/components/CustomerStatsCards";
 import { useCustomerList } from "@/features/super-admin/customer/hooks/useCustomerList";
+import { Suspense } from "react";
 
 export default function CustomersPage() {
   const {
@@ -31,53 +32,57 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <CustomerPageHeader />
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <CustomerPageHeader />
 
-      {/* Stats Cards */}
-      <CustomerStatsCards
-        customers={customers}
-        totalFromPagination={pagination.total}
-      />
+        {/* Stats Cards */}
+        <CustomerStatsCards
+          customers={customers}
+          totalFromPagination={pagination.total}
+        />
 
-      {/* Main Table Card */}
-      <Card className="border-none shadow-sm">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            <div>
-              <CardTitle className="text-base">Registered Customers</CardTitle>
-              {pagination.total > 0 && (
-                <p className="text-sm text-slate-500 mt-1">
-                  Total: {pagination.total} customers
-                </p>
-              )}
+        {/* Main Table Card */}
+        <Card className="border-none shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div>
+                <CardTitle className="text-base">
+                  Registered Customers
+                </CardTitle>
+                {pagination.total > 0 && (
+                  <p className="text-sm text-slate-500 mt-1">
+                    Total: {pagination.total} customers
+                  </p>
+                )}
+              </div>
+              <CustomerSearchBar value={search} onChange={setSearch} />
             </div>
-            <CustomerSearchBar value={search} onChange={setSearch} />
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* Filter row */}
-          <CustomerFilters
-            itemsPerPage={pagination.limit}
-            onItemsPerPageChange={handleLimitChange}
-          />
-
-          {/* Table or loading spinner */}
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            </div>
-          ) : (
-            <CustomerTable
-              data={customers}
-              pagination={pagination}
-              onPageChange={handlePageChange}
+          <CardContent className="space-y-4">
+            {/* Filter row */}
+            <CustomerFilters
+              itemsPerPage={pagination.limit}
+              onItemsPerPageChange={handleLimitChange}
             />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            {/* Table or loading spinner */}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            ) : (
+              <CustomerTable
+                data={customers}
+                pagination={pagination}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </Suspense>
   );
 }

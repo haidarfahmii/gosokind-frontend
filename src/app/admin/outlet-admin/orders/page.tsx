@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   OrderPageHeader,
@@ -198,7 +199,9 @@ function OrderPageContent() {
 export default function OrderPage() {
   return (
     <OutletFilterProvider>
-      <OrderPageContent />
+      <Suspense fallback={<div>Loading orders data...</div>}>
+        <OrderPageContent />
+      </Suspense>
     </OutletFilterProvider>
   );
 }

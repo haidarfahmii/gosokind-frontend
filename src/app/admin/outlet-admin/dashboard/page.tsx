@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 
 import {
   Package,
@@ -28,7 +29,7 @@ import { useBypassRequests } from "@/features/order/hooks/useBypassRequests";
 import { useEmployees } from "@/features/outlet-admin/hooks/useEmployees";
 import { formatCurrency } from "@/utils/formatters";
 
-export default function OutletAdminDashboard() {
+function OutletAdminDashboardContent() {
   const { data: session } = useSession();
   const {
     stats,
@@ -240,6 +241,14 @@ export default function OutletAdminDashboard() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function OutletAdminDashboard() {
+  return (
+    <Suspense fallback={<div>Loading dashboard...</div>}>
+      <OutletAdminDashboardContent />
+    </Suspense>
   );
 }
 

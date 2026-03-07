@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,7 +13,7 @@ import { useEmployeeList } from "@/features/super-admin/employee/hooks/useEmploy
 import { useOutletFilter } from "@/hooks/useOutletFilter";
 import { Employee } from "@/@types/employee.types";
 
-export default function EmployeesPage() {
+function EmployeesPageContent() {
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
@@ -170,5 +170,13 @@ export default function EmployeesPage() {
         outlets={outlets}
       />
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={<div>Loading employees...</div>}>
+      <EmployeesPageContent />
+    </Suspense>
   );
 }

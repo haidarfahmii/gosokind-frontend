@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import AttendanceDashboard from "@/features/employee/components/attendance/AttendanceDashboard";
+import AttendanceHistoryView from "@/features/employee/components/attendance/AttendanceHistoryView";
 import {
   useAvailableJobs,
   useActiveJob,
@@ -10,10 +11,11 @@ import {
 import { useStationOrders } from "@/features/employee/hooks/useWorkfloor";
 import { StationType } from "@/@types/worker.types";
 import Link from "next/link";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Truck, Package, Briefcase, ArrowRight } from "lucide-react";
+import { Truck, Package, Briefcase, ArrowRight, LayoutDashboard, History } from "lucide-react";
 
 const mapRoleToStation = (role: string): StationType | null => {
   if (role === "WORKER_WASHING") return "WASHING";
@@ -37,6 +39,7 @@ const mapRoleToStation = (role: string): StationType | null => {
 export default function EmployeeDashboardPage() {
   const { data: session, status } = useSession();
   const role = session?.user?.role || "";
+  const [activeTab, setActiveTab] = useState<"dashboard" | "history">("dashboard");
 
   const isDriver = role === "DRIVER";
   const station = mapRoleToStation(role);
@@ -65,14 +68,49 @@ export default function EmployeeDashboardPage() {
         </Badge>
       </div>
 
-      {/* ── 1. Attendance Widget — always shown ───────────────────────── */}
-      <section>
-        <AttendanceDashboard />
-      </section>
+      {/* ── Tabs Navigation ─────────────────────────────────────────── */}
+      <div className="flex p-1 bg-gray-100 rounded-lg w-fit">
+        <button
+          className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-all duration-200 ${
+            activeTab === "dashboard"
+              ? "bg-white text-primary shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
+          }`}
+          onClick={() => setActiveTab("dashboard")}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          Dashboard
+        </button>
+        <button
+          className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-all duration-200 ${
+            activeTab === "history"
+              ? "bg-white text-primary shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
+          }`}
+          onClick={() => setActiveTab("history")}
+        >
+          <History className="w-4 h-4" />
+          History
+        </button>
+      </div>
 
-      {/* ── 2. Role-specific summary card ────────────────────────────── */}
-      {isDriver && <DriverSummaryCard />}
-      {isWorker && station && <WorkerSummaryCard station={station} />}
+      {/* ── Tab Content ──────────────────────────────────────────────── */}
+      {activeTab === "dashboard" ? (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* 1. Attendance Widget — always shown */}
+          <section>
+            <AttendanceDashboard />
+          </section>
+
+          {/* 2. Role-specific summary card */}
+          {isDriver && <DriverSummaryCard />}
+          {isWorker && station && <WorkerSummaryCard station={station} />}
+        </div>
+      ) : (
+        <div className="animate-in fade-in duration-300">
+          <AttendanceHistoryView />
+        </div>
+      )}
     </div>
   );
 }

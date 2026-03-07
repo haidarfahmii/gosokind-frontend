@@ -1,5 +1,14 @@
 export type StationType = "WASHING" | "IRONING" | "PACKING";
 
+export interface Attendance {
+  id: string;
+  employeeId: string;
+  clockIn: Date | string;
+  clockOut: Date | string | null;
+  date: Date | string;
+}
+
+
 // DTO: Raw response
 export interface StationOrderDTO {
   id: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { OutletTable } from "@/features/super-admin/outlet/components/OutletTabl
 import { OutletDialog } from "@/features/super-admin/outlet/components/OutletDialog";
 import { Outlet } from "@/features/super-admin/outlet/types";
 
-export default function OutletManagementPage() {
+function OutletManagementPageContent() {
   const {
     outlets,
     loading,
@@ -176,5 +176,13 @@ export default function OutletManagementPage() {
         onSuccess={handleSuccess}
       />
     </div>
+  );
+}
+
+export default function OutletManagementPage() {
+  return (
+    <Suspense fallback={<div>Loading outlets...</div>}>
+      <OutletManagementPageContent />
+    </Suspense>
   );
 }

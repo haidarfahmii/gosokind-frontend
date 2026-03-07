@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import MobileNav from "@/components/layout/MobileNav";
 import { Package, ChevronRight, CheckCircle2, Clock, Loader2, ChevronLeft } from "lucide-react";
 import axiosInstance from "@/utils/axiosInstance";
@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge";
 
-export default function OrdersPage() {
+function OrdersPageContent() {
     const { data: session } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -201,5 +201,13 @@ export default function OrdersPage() {
                 <MobileNav />
             </div>
         </div>
+    );
+}
+
+export default function OrdersPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">Loading orders...</div>}>
+            <OrdersPageContent />
+        </Suspense>
     );
 }

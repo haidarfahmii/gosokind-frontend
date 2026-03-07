@@ -1,0 +1,57 @@
+// src/features/auth/components/ui/button.tsx
+
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+    // Masukkan base class yang Anda inginkan di sini
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-bold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] active:scale-[0.98]", 
+    {
+        variants: {
+            variant: {
+                // Tambahkan gaya khusus Anda ke dalam variant default atau buat variant baru
+                default: "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 rounded-xl",
+                destructive: "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 rounded-md",
+                outline: "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md",
+                secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md",
+                ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md",
+                link: "text-primary underline-offset-4 hover:underline",
+            },
+            size: {
+                default: "h-11 px-6 py-3.5", // Sesuaikan height dan padding agar mirip py-3.5
+                sm: "h-8 rounded-md gap-1.5 px-3",
+                lg: "h-12 rounded-md px-8",
+                icon: "size-9",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+            size: "default",
+        },
+    }
+)
+
+function Button({
+    className,
+    variant,
+    size,
+    asChild = false,
+    ...props
+}: React.ComponentProps<"button"> &
+    VariantProps<typeof buttonVariants> & {
+        asChild?: boolean
+    }) {
+    const Comp = asChild ? Slot : "button"
+
+    return (
+        <Comp
+            data-slot="button"
+            className={cn(buttonVariants({ variant, size, className }))}
+            {...props}
+        />
+    )
+}
+
+export { Button, buttonVariants }

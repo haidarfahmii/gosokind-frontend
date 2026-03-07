@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { EmployeeTable } from "@/features/outlet-admin/components/employees/Empl
 import { EmployeeForm } from "@/features/outlet-admin/components/employees/EmployeeForm";
 import { OutletEmployee } from "@/features/outlet-admin/types/employee.types";
 
-export default function EmployeesPage() {
+function EmployeesPageContent() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] =
     useState<OutletEmployee | null>(null);
@@ -114,5 +114,13 @@ export default function EmployeesPage() {
         onSubmit={handleSubmit}
       />
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={<div>Loading employees...</div>}>
+      <EmployeesPageContent />
+    </Suspense>
   );
 }

@@ -16,7 +16,6 @@ import { useOrderDetail, useBypassRequests } from "@/features/order/hooks";
 import { getStatusConfig } from "@/features/order/types/order.types";
 import { BypassRequestDialog } from "@/features/order/components/bypass-request";
 import {
-  AdminStatusControl,
   CustomerInfoCard,
   OrderSummaryCard,
   LaundryItemsCard,
@@ -165,10 +164,6 @@ export function OrderDetailPageContent({
 
       {/* Status Progress */}
       <OrderStatusProgress currentStatus={order.status} />
-
-      {/* ─── Dev/Testing: Admin Manual Status Control ────────────── */}
-      {/* Tampil hanya saat status di station (WASHING, IRONING, PACKING, WAITING_FOR_PAYMENT) */}
-      {/* <AdminStatusControl order={order} onSuccess={refetch} /> */}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

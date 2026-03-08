@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import {
   Package,
   Users,
-  TrendingUp,
   DollarSign,
   Clock,
   CheckCircle2,

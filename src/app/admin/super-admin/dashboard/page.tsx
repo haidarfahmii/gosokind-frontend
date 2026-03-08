@@ -3,7 +3,6 @@
 import {
   Store,
   Users,
-  Shirt,
   Calendar,
   RefreshCw,
   ShoppingBag,

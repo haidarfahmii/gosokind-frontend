@@ -22,7 +22,7 @@ export default function Navbar() {
     }, []);
     const navLinks = [
         { name: "Beranda", href: "/" },
-        { name: "Layanan", href: "#services" },
+        { name: "Layanan", href: "#layanan" },
         { name: "Harga", href: "#pricing" },
         { name: "Tentang Kami", href: "#about" },
     ];

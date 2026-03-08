@@ -15,11 +15,6 @@ export default withAuth(
     const path = req.nextUrl.pathname;
     const role = token?.role as string | undefined;
 
-    // customer login page
-    if (path === "/auth/login" && token && role) {
-      return NextResponse.redirect(new URL(getDefaultDashboard(role), req.url));
-    }
-
     // employee login page
     if (path === "/auth/employee/login") {
       if (token && role) {

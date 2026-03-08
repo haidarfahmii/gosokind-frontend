@@ -1,7 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
+import { useState } from "react";
+import { FiArrowRight } from "react-icons/fi";
+import Link from "next/link"; // 1. Import komponen Link
+// Import Swiper React components & Modules
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation, Pagination, EffectFade } from "swiper/modules";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 
 const slides = [
     {
@@ -27,90 +37,76 @@ const slides = [
     }
 ];
 
-const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
-
 export default function Hero() {
-    const [currentIndex, setCurrentIndex] = useState(1);
-    const [isTransitioning, setIsTransitioning] = useState(false); // Default false agar bisa diklik pertama kali
-    const [useAnimation, setUseAnimation] = useState(true);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-    const move = (step: number) => {
-        if (isTransitioning) return;
-        setUseAnimation(true);
-        setIsTransitioning(true);
-        setCurrentIndex(prev => prev + step);
-    };
-
-    const handleTransitionEnd = () => {
-        setIsTransitioning(false);
-        if (currentIndex === 0 || currentIndex === extendedSlides.length - 1) {
-            setUseAnimation(false);
-            setCurrentIndex(currentIndex === 0 ? extendedSlides.length - 2 : 1);
-        }
-    };
-
-    useEffect(() => {
-        timerRef.current = setInterval(() => move(1), 5000);
-        return () => clearInterval(timerRef.current!);
-    }, [currentIndex, isTransitioning]);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center bg-[#0a0c14] text-white pt-20 overflow-hidden">
+        <section className="relative min-h-dvh flex items-center justify-center bg-[#0a0c14] text-white pt-20 overflow-hidden">
 
+            {/* Background Blur Effect */}
             <div
-                className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full transition-transform duration-1000 ease-out"
-                style={{ transform: `translateX(${(currentIndex - 1) * 20}px)` }}
+                className="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-blue-600/20 blur-[100px] md:blur-[120px] rounded-full transition-transform duration-1000 ease-out z-0"
+                style={{ transform: `translateX(${activeIndex * 20}px)` }}
             />
 
-            <div
-                className={`flex h-full ${useAnimation ? "transition-transform duration-700 ease-in-out" : "transition-none"}`}
-                style={{
-                    transform: `translateX(-${currentIndex * 100}%)`,
-                    width: `${extendedSlides.length * 100}%`
-                }}
-                onTransitionEnd={handleTransitionEnd}
-            >
-                {extendedSlides.map((slide, index) => (
-                    <div key={index} className="w-full shrink-0 flex items-center justify-center px-6">
-                        <div className="relative z-10 max-w-4xl text-center">
-                            <span className="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 rounded-full">
-                                {slide.badge}
-                            </span>
-                            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                                {slide.title}
-                            </h1>
-                            <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-                                {slide.description}
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <button className="group bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-full font-bold text-lg transition flex items-center justify-center gap-2">
-                                    {slide.primaryBtn}
-                                    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                                </button>
-                                <button className="border border-white/20 hover:bg-white/10 px-8 py-4 rounded-full font-bold text-lg transition">
-                                    {slide.secondaryBtn}
-                                </button>
+            <div className="w-full max-w-7xl mx-auto h-full z-10 flex items-center justify-center">
+                <Swiper
+                    modules={[Autoplay, Navigation, Pagination, EffectFade]}
+                    effect="fade"
+                    fadeEffect={{ crossFade: true }}
+                    speed={800}
+                    navigation={true}
+                    pagination={{
+                        clickable: true,
+                        dynamicBullets: true,
+                    }}
+                    autoplay={{
+                        delay: 5000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                    }}
+                    loop={true}
+                    onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+                    className="w-full h-full"
+                    style={{
+                        "--swiper-navigation-color": "#ffffff",
+                        "--swiper-navigation-size": "24px",
+                        "--swiper-pagination-color": "#2563eb",
+                        "--swiper-pagination-bullet-inactive-color": "#ffffff",
+                        "--swiper-pagination-bullet-inactive-opacity": "0.3",
+                    } as React.CSSProperties}
+                >
+                    {slides.map((slide, index) => (
+                        <SwiperSlide key={index}>
+                            <div className="flex h-full w-full flex-col items-center justify-center px-6 sm:px-12 pb-12 pt-4">
+                                <div className="relative z-10 w-full max-w-4xl mx-auto text-center flex flex-col items-center justify-center min-h-[50vh]">
+                                    <span className="inline-block px-4 py-1.5 mb-4 md:mb-6 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 rounded-full">
+                                        {slide.badge}
+                                    </span>
+                                    <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 leading-tight">
+                                        {slide.title}
+                                    </h1>
+                                    <p className="text-gray-400 text-base sm:text-lg md:text-xl mb-8 md:mb-10 max-w-2xl mx-auto">
+                                        {slide.description}
+                                    </p>
+
+                                    {/* 2. Ubah Button menjadi Link */}
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
+                                        {/* Primary Button mengarah ke /home */}
+                                        <Link
+                                            href="/home"
+                                            className="group w-full sm:w-auto bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-full font-bold text-base sm:text-lg transition flex items-center justify-center gap-2"
+                                        >
+                                            {slide.primaryBtn}
+                                            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                        </Link>
+
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Navigation Arrows */}
-            {[-1, 1].map(dir => (
-                <button key={dir} onClick={() => move(dir)} disabled={isTransitioning}
-                    className={`absolute z-20 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition hidden md:block disabled:opacity-50 ${dir === -1 ? 'left-6' : 'right-6'}`}>
-                    {dir === -1 ? <FiChevronLeft size={24} /> : <FiChevronRight size={24} />}
-                </button>
-            ))}
-
-            {/* Indicators */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                {slides.map((_, i) => (
-                    <button key={i} onClick={() => { setUseAnimation(true); setCurrentIndex(i + 1); }}
-                        className={`h-2 transition-all duration-300 rounded-full ${((currentIndex - 1 + slides.length) % slides.length === i) ? "w-8 bg-blue-600" : "w-2 bg-white/20"}`} />
-                ))}
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
         </section>
     );

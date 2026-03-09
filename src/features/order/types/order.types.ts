@@ -1,5 +1,6 @@
 // Order Status Enum
 export enum OrderStatus {
+  SCHEDULED_FOR_PICKUP = "SCHEDULED_FOR_PICKUP",
   WAITING_FOR_PICKUP = "WAITING_FOR_PICKUP",
   PICKUP_ON_THE_WAY = "PICKUP_ON_THE_WAY",
   ARRIVED_AT_OUTLET = "ARRIVED_AT_OUTLET",
@@ -207,6 +208,11 @@ export const getStatusConfig = (
     OrderStatus,
     { label: string; color: string; bgColor: string }
   > = {
+    [OrderStatus.SCHEDULED_FOR_PICKUP]: {
+      label: "Scheduled for Pickup",
+      color: "text-sky-700",
+      bgColor: "bg-sky-100",
+    },
     [OrderStatus.WAITING_FOR_PICKUP]: {
       label: "Waiting Pickup",
       color: "text-yellow-700",
@@ -264,5 +270,11 @@ export const getStatusConfig = (
     },
   };
 
-  return configs[status];
+  return (
+    configs[status] ?? {
+      label: String(status).replace(/_/g, " "),
+      color: "text-slate-700",
+      bgColor: "bg-slate-100",
+    }
+  );
 };

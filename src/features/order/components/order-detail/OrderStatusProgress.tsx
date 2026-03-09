@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  CalendarClock,
   CheckCircle2,
   Truck,
   Package,
@@ -27,6 +28,12 @@ const STATUS_STEPS: {
   shortLabel: string;
   icon: React.ElementType;
 }[] = [
+  {
+    status: OrderStatus.SCHEDULED_FOR_PICKUP,
+    label: "Scheduled for Pickup",
+    shortLabel: "Scheduled",
+    icon: CalendarClock,
+  },
   {
     status: OrderStatus.WAITING_FOR_PICKUP,
     label: "Waiting for Pickup",
@@ -96,17 +103,18 @@ const STATUS_STEPS: {
 ];
 
 const STATUS_ORDER_INDEX: Record<OrderStatus, number> = {
-  [OrderStatus.WAITING_FOR_PICKUP]: 0,
-  [OrderStatus.PICKUP_ON_THE_WAY]: 1,
-  [OrderStatus.ARRIVED_AT_OUTLET]: 2,
-  [OrderStatus.WASHING]: 3,
-  [OrderStatus.IRONING]: 4,
-  [OrderStatus.PACKING]: 5,
-  [OrderStatus.WAITING_FOR_PAYMENT]: 6,
-  [OrderStatus.READY_FOR_DELIVERY]: 7,
-  [OrderStatus.DELIVERY_ON_THE_WAY]: 8,
-  [OrderStatus.RECEIVED_BY_CUSTOMER]: 9,
-  [OrderStatus.COMPLETED]: 10,
+  [OrderStatus.SCHEDULED_FOR_PICKUP]: 0,
+  [OrderStatus.WAITING_FOR_PICKUP]: 1,
+  [OrderStatus.PICKUP_ON_THE_WAY]: 2,
+  [OrderStatus.ARRIVED_AT_OUTLET]: 3,
+  [OrderStatus.WASHING]: 4,
+  [OrderStatus.IRONING]: 5,
+  [OrderStatus.PACKING]: 6,
+  [OrderStatus.WAITING_FOR_PAYMENT]: 7,
+  [OrderStatus.READY_FOR_DELIVERY]: 8,
+  [OrderStatus.DELIVERY_ON_THE_WAY]: 9,
+  [OrderStatus.RECEIVED_BY_CUSTOMER]: 10,
+  [OrderStatus.COMPLETED]: 11,
 };
 
 /**

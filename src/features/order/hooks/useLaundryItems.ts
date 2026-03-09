@@ -9,6 +9,7 @@ export interface LaundryItem {
   name: string;
   category?: string;
   basePrice?: number;
+  pricingType: "WEIGHT" | "ITEM";
 }
 
 /**

@@ -10,8 +10,9 @@ export const inputOrderDetailsSchema = Yup.object().shape({
       Yup.object().shape({
         laundryItemId: Yup.string().required("Laundry item is required"),
         quantity: Yup.number()
-          .min(1, "Quantity must be at least 1")
-          .required("Quantity is required"),
+          .typeError("Quantity harus berupa angka")
+          .min(0.1, "Quantity minimal 0.1")
+          .required("Quantity wajib diisi"),
       }),
     )
     .min(1, "At least one item is required")

@@ -5,6 +5,10 @@ export const laundryItemValidationSchema = Yup.object().shape({
     .min(3, "Nama item minimal 3 karakter")
     .required("Nama item wajib diisi"),
 
+  pricingType: Yup.string()
+    .oneOf(["WEIGHT", "ITEM"], "Tipe harga harus Kiloan atau Satuan")
+    .required("Tipe harga wajib dipilih"),
+
   category: Yup.string().required("Kategori wajib dipilih"),
 
   unit: Yup.string().required("Satuan unit wajib diisi (cth: Kg, Pcs)"),

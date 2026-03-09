@@ -84,11 +84,25 @@ export const useInputOrderDetailsForm = ({
     field: "laundryItemId" | "quantity",
     value: string | number,
   ) => {
-    const newItems = [...formik.values.items];
-    newItems[index] = { ...newItems[index], [field]: value };
+    const newItems = formik.values.items.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
     formik.setFieldValue("items", newItems);
   };
 
+  const handleItemSelect = (index: number, laundryItemId: string) => {
+    const selected = laundryItems.find((li) => li.id === laundryItemId);
+    const quantity = selected?.pricingType === "WEIGHT" ? 1.0 : 1;
+
+    const newItems = formik.values.items.map((item, i) =>
+      i === index ? { ...item, laundryItemId, quantity } : item,
+    );
+    formik.setFieldValue("items", newItems);
+  };
+
+  // basePrice * quantity works for both types
+  // WEIGHT: 7000/kg × 3.2kg = 22400
+  // ITEM:   15000/pcs × 2pcs = 30000
   const getTotalPrice = () =>
     formik.values.items.reduce((total, item) => {
       const found = laundryItems.find((li) => li.id === item.laundryItemId);
@@ -107,6 +121,7 @@ export const useInputOrderDetailsForm = ({
     handleAddItem,
     handleRemoveItem,
     handleItemChange,
+    handleItemSelect,
     getTotalPrice,
     handleClose,
   };

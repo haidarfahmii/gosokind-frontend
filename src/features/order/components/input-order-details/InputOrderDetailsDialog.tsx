@@ -47,6 +47,7 @@ export function InputOrderDetailsDialog({
     handleAddItem,
     handleRemoveItem,
     handleItemChange,
+    handleItemSelect,
     getTotalPrice,
     handleClose,
   } = useInputOrderDetailsForm({
@@ -97,6 +98,7 @@ export function InputOrderDetailsDialog({
             onAddItem={handleAddItem}
             onRemoveItem={handleRemoveItem}
             onItemChange={handleItemChange}
+            onItemSelect={handleItemSelect}
           />
 
           {/* Estimated Price */}

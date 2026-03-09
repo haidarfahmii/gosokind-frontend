@@ -60,12 +60,18 @@ export interface LaundryItemInfo {
   id: string;
   name: string;
   category?: string;
+  pricingType: string;
 }
 
 // Order Item
 export interface OrderItem {
   id: string;
-  laundryItem: LaundryItemInfo;
+  laundryItem: {
+    id: string;
+    name: string;
+    category: string | null;
+    pricingType: "WEIGHT" | "ITEM";
+  };
   quantity: number;
 }
 

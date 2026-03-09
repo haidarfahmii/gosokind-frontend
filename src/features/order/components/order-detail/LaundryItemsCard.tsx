@@ -56,10 +56,7 @@ export function LaundryItemsCard({ order }: LaundryItemsCardProps) {
                   )}
                 </div>
                 <div className="text-right">
-                  {/* Tampilkan unit yang sesuai */}
-                  <p className="font-semibold">
-                    {isWeight ? `${item.quantity} kg` : `${item.quantity} pcs`}
-                  </p>
+                  <p className="font-semibold">{`${item.quantity} pcs`}</p>
                 </div>
               </div>
             );

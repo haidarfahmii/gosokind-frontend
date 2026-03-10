@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/features/order/components";
 import { useOrderPage } from "@/features/order/hooks";
 import { OutletFilterProvider } from "@/contexts/OutletFilterContext";
+import { Button } from "@/components/ui/button";
 
 /**
  * Order Management Page - Reusable for Outlet Admin & Super Admin
@@ -59,6 +60,7 @@ function OrderPageContent() {
     pagination,
     handlePageChange,
     handleLimitChange,
+    refetch,
 
     // Outlets
     outlets,
@@ -129,7 +131,20 @@ function OrderPageContent() {
                 </p>
               )}
             </div>
-            <SearchBar value={search} onChange={setSearch} />
+            <div className="flex items-center gap-2">
+              <SearchBar value={search} onChange={setSearch} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refetch}
+                disabled={loading}
+                className="gap-2 shrink-0"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+                />
+              </Button>
+            </div>
           </div>
         </CardHeader>
 

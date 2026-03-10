@@ -1,138 +1,152 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { orderService } from "@/features/order/services/order.service";
-import { reportService } from "@/features/report/services/report.service";
 import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
 import { employeeService } from "@/services/employee.service";
+import { OrderStatus } from "@/features/order/types/order.types";
 import {
   DashboardStats,
   DashboardRecentOrder,
-  DashboardRevenuePoint,
 } from "@/features/dashboard/types/dashboard.types";
 
-const getTodayDateString = () => new Date().toISOString().split("T")[0];
+const PIPELINE_GROUPS = {
+  PENDING: [
+    OrderStatus.SCHEDULED_FOR_PICKUP,
+    OrderStatus.WAITING_FOR_PICKUP,
+    OrderStatus.PICKUP_ON_THE_WAY,
+    OrderStatus.ARRIVED_AT_OUTLET,
+  ],
+  PROCESSING: [
+    OrderStatus.WASHING,
+    OrderStatus.IRONING,
+    OrderStatus.PACKING,
+    OrderStatus.WAITING_FOR_PAYMENT,
+  ],
+  READY: [OrderStatus.READY_FOR_DELIVERY],
+  DELIVERED: [
+    OrderStatus.DELIVERY_ON_THE_WAY,
+    OrderStatus.RECEIVED_BY_CUSTOMER,
+    OrderStatus.COMPLETED,
+  ],
+} as const;
 
-const getMonthsAgoDateString = (months: number) => {
-  const d = new Date();
-  d.setMonth(d.getMonth() - months);
-  return d.toISOString().split("T")[0];
+// Dropdown filter widget — hanya status yang dikenali backend validator
+export const DELIVERY_FILTER_OPTIONS = [
+  { value: "ALL", label: "All Statuses" },
+  { value: OrderStatus.SCHEDULED_FOR_PICKUP, label: "Scheduled" },
+  { value: OrderStatus.WAITING_FOR_PICKUP, label: "Waiting Pickup" },
+  { value: OrderStatus.PICKUP_ON_THE_WAY, label: "Pickup in Progress" },
+  { value: OrderStatus.ARRIVED_AT_OUTLET, label: "Arrived at Outlet" },
+  { value: OrderStatus.WASHING, label: "Washing" },
+  { value: OrderStatus.IRONING, label: "Ironing" },
+  { value: OrderStatus.PACKING, label: "Packing" },
+  { value: OrderStatus.WAITING_FOR_PAYMENT, label: "Waiting Payment" },
+  { value: OrderStatus.READY_FOR_DELIVERY, label: "Ready for Delivery" },
+  { value: OrderStatus.DELIVERY_ON_THE_WAY, label: "On the Way" },
+  { value: OrderStatus.RECEIVED_BY_CUSTOMER, label: "Received by Customer" },
+  { value: OrderStatus.COMPLETED, label: "Completed" },
+];
+
+const getTodayLocalRange = (): { startDate: string; endDate: string } => {
+  const now = new Date();
+  // Start of today local time → konversi ke UTC ISO string
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  // End of today local time → konversi ke UTC ISO string
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+  return {
+    startDate: startOfDay.toISOString(), // e.g. "2025-03-09T17:00:00.000Z" (WIB)
+    endDate: endOfDay.toISOString(), // e.g. "2025-03-10T16:59:59.999Z" (WIB)
+  };
 };
 
-const getFirstDayOfMonth = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0];
+/**
+ * Query count untuk SATU status.
+ * Axios throw untuk 4xx → catch → return 0 (tidak merusak Promise.all).
+ */
+const fetchStatusCount = async (
+  status: OrderStatus,
+  extraParams: Record<string, any> = {},
+): Promise<number> => {
+  try {
+    const res = await axiosInstance.get("/orders", {
+      params: { page: 1, limit: 1, status, ...extraParams },
+    });
+    return (
+      res.data?.data?.pagination?.total ?? res.data?.pagination?.total ?? 0
+    );
+  } catch {
+    return 0;
+  }
 };
+
+/**
+ * Jumlahkan count dari beberapa status secara paralel.
+ */
+const fetchGroupCount = (
+  statuses: readonly OrderStatus[],
+  extraParams: Record<string, any> = {},
+): Promise<number> =>
+  Promise.all(statuses.map((s) => fetchStatusCount(s, extraParams))).then(
+    (counts) => counts.reduce((a, b) => a + b, 0),
+  );
 
 export const dashboardService = {
   /**
-   * Fetch aggregated stats for the dashboard.
-   * - outletId: "all" for Super Admin, specific ID for Outlet Admin
+   * Ambil stats pipeline order (Pending / Processing / Ready / Delivered).
+   * Tidak pakai filter tanggal → menampilkan semua order aktif.
    */
   async getStats(outletId?: string): Promise<DashboardStats> {
-    const today = getTodayDateString();
-    const firstDayOfMonth = getFirstDayOfMonth();
+    const params: Record<string, any> = {};
+    if (outletId && outletId !== "all") params.outletId = outletId;
 
-    const orderParams: any = {
-      page: 1,
-      limit: 1,
-      startDate: today,
-      endDate: today,
-    };
-    if (outletId && outletId !== "all") {
-      orderParams.outletId = outletId;
-    }
-
-    // Run requests in parallel
     const [
-      todayOrdersRes,
-      pendingOrdersRes,
-      completedOrdersRes,
-      salesRes,
+      pendingOrders,
+      processingOrders,
+      readyToDelivery,
+      deliveredOrders,
       employeesRes,
       bypassRes,
-    ] = await Promise.allSettled([
-      // Total orders today
-      axiosInstance.get("/orders", { params: { ...orderParams } }),
-      // Pending orders (WAITING_FOR_PICKUP + ARRIVED_AT_OUTLET)
-      axiosInstance.get("/orders", {
-        params: {
-          ...orderParams,
-          startDate: undefined,
-          endDate: undefined,
-          status: "WAITING_FOR_PICKUP",
-          limit: 1,
-        },
-      }),
-      // Completed today
-      axiosInstance.get("/orders", {
-        params: { ...orderParams, status: "COMPLETED" },
-      }),
-      // Today's revenue via sales report
-      reportService.getSalesReport({
-        period: "daily",
-        startDate: firstDayOfMonth,
-        endDate: today,
-        outletId: outletId !== "all" ? outletId : undefined,
-      }),
-      // Active employees
-      employeeService.getAllEmployees({
-        page: 1,
-        limit: 1,
-        isActive: true,
-        ...(outletId && outletId !== "all" ? { outletId } : {}),
-      }),
-      // Pending bypass requests
-      orderService.getPendingBypassRequests({
-        page: 1,
-        limit: 1,
-        ...(outletId && outletId !== "all" ? { outletId } : {}),
-      }),
+    ] = await Promise.all([
+      fetchGroupCount(PIPELINE_GROUPS.PENDING, params),
+      fetchGroupCount(PIPELINE_GROUPS.PROCESSING, params),
+      fetchGroupCount(PIPELINE_GROUPS.READY, params),
+      fetchGroupCount(PIPELINE_GROUPS.DELIVERED, params),
+      employeeService
+        .getAllEmployees({ page: 1, limit: 1, isActive: true, ...params })
+        .catch(() => null),
+      orderService
+        .getPendingBypassRequests({ page: 1, limit: 1, ...params })
+        .catch(() => null),
     ]);
 
-    const todayOrders =
-      todayOrdersRes.status === "fulfilled"
-        ? (todayOrdersRes.value.data?.data?.pagination?.total ?? 0)
-        : 0;
-
-    const pendingOrders =
-      pendingOrdersRes.status === "fulfilled"
-        ? (pendingOrdersRes.value.data?.data?.pagination?.total ?? 0)
-        : 0;
-
-    const completedToday =
-      completedOrdersRes.status === "fulfilled"
-        ? (completedOrdersRes.value.data?.data?.pagination?.total ?? 0)
-        : 0;
-
-    // Sum revenue from today's data points in sales report
-    let todayRevenue = 0;
-    if (salesRes.status === "fulfilled" && salesRes.value.success) {
-      const todayPoint = salesRes.value.data.data.find(
-        (d) => d.period === today,
-      );
-      todayRevenue = todayPoint?.totalRevenue ?? 0;
-    }
-
-    const activeEmployees =
-      employeesRes.status === "fulfilled"
-        ? (employeesRes.value.pagination?.total ?? 0)
-        : 0;
-
-    const pendingBypassRequests =
-      bypassRes.status === "fulfilled" && bypassRes.value.success
-        ? (bypassRes.value.data?.pagination?.total ?? 0)
-        : 0;
-
     return {
-      totalOrders: todayOrders,
       pendingOrders,
-      completedToday,
-      todayRevenue,
-      activeEmployees,
-      pendingBypassRequests,
+      processingOrders,
+      readyToDelivery,
+      deliveredOrders,
+      activeEmployees: employeesRes?.pagination?.total ?? 0,
+      pendingBypassRequests: bypassRes?.success
+        ? (bypassRes.data?.pagination?.total ?? 0)
+        : 0,
     };
   },
 
-  // Fetch super admin specific stats (adds outlet & total employee counts).
+  /** Super Admin only: total outlet & karyawan */
   async getSuperAdminStats(): Promise<Partial<DashboardStats>> {
     const [outletsRes, employeesRes] = await Promise.allSettled([
       outletService.getAllOutlets({ page: 1, limit: 1 }),
@@ -146,7 +160,6 @@ export const dashboardService = {
           0)
         : 0;
 
-    // Active outlets
     const activeOutletsRes = await outletService
       .getAllOutlets({ page: 1, limit: 1 })
       .catch(() => null);
@@ -160,46 +173,54 @@ export const dashboardService = {
     return { totalOutlets, activeOutlets, totalEmployees };
   },
 
-  // Fetch recent orders for dashboard widget (top 5)
-  async getRecentOrders(outletId?: string): Promise<DashboardRecentOrder[]> {
-    const params: any = { page: 1, limit: 5 };
-    if (outletId && outletId !== "all") params.outletId = outletId;
+  /**
+   * Ambil orders hari ini untuk tabel "Today's Delivery".
+   */
+  async getTodaysDeliveryOrders(params: {
+    outletId?: string;
+    search?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ orders: DashboardRecentOrder[]; total: number }> {
+    const { startDate, endDate } = getTodayLocalRange();
 
-    const response = await orderService.getAllOrders(params);
-    if (!response.success) return [];
+    const queryParams: Record<string, any> = {
+      page: params.page ?? 1,
+      limit: params.limit ?? 10,
+      startDate, // ISO full string → misal "2025-03-09T17:00:00.000Z"
+      endDate, // ISO full string → misal "2025-03-10T16:59:59.999Z"
+    };
 
-    return (response.data?.orders ?? []).map((order) => ({
-      id: order.id,
-      orderNumber: order.orderNumber,
-      customerName: order.customer?.fullName ?? "-",
-      outletName: order.outlet?.name,
-      status: order.status,
-      isPaid: order.isPaid,
-      totalWeight: order.totalWeight,
-      totalPrice: order.totalPrice,
-      createdAt: order.createdAt,
-    }));
-  },
+    if (params.outletId && params.outletId !== "all")
+      queryParams.outletId = params.outletId;
+    if (params.search?.trim()) queryParams.search = params.search.trim();
+    if (params.status && params.status !== "ALL")
+      queryParams.status = params.status;
 
-  // Fetch revenue trend data for the last 6 months
-  async getRevenueTrend(outletId?: string): Promise<DashboardRevenuePoint[]> {
-    const endDate = getTodayDateString();
-    const startDate = getMonthsAgoDateString(6);
+    try {
+      const response = await orderService.getAllOrders(queryParams);
+      if (!response.success) return { orders: [], total: 0 };
 
-    const response = await reportService.getSalesReport({
-      period: "monthly",
-      startDate,
-      endDate,
-      outletId: outletId !== "all" ? outletId : undefined,
-    });
+      const orders = (response.data?.orders ?? []).map((order) => ({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customer?.fullName ?? "-",
+        outletName: order.outlet?.name,
+        status: order.status,
+        isPaid: order.isPaid,
+        totalWeight: order.totalWeight,
+        totalPrice: order.totalPrice,
+        createdAt: order.createdAt,
+      }));
 
-    if (!response.success) return [];
-
-    return response.data.data.map((d) => ({
-      period: d.period,
-      totalRevenue: d.totalRevenue,
-      totalOrders: d.totalOrders,
-      paidOrders: d.paidOrders,
-    }));
+      return {
+        orders,
+        total: response.data?.pagination?.total ?? orders.length,
+      };
+    } catch (err) {
+      console.error("getTodaysDeliveryOrders error:", err);
+      return { orders: [], total: 0 };
+    }
   },
 };

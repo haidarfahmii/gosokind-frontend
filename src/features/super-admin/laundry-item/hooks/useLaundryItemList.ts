@@ -25,6 +25,9 @@ export function useLaundryItemList() {
   const [filterCategory, setFilterCategory] = useState(() =>
     urlState.getParam("category", "all"),
   );
+  const [filterPricingType, setFilterPricingType] = useState(() =>
+    urlState.getParam("pricingType", "all"),
+  );
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -46,6 +49,8 @@ export function useLaundryItemList() {
 
       if (debouncedSearch) query.search = debouncedSearch;
       if (filterCategory !== "all") query.category = filterCategory;
+      if (filterPricingType !== "all")
+        query.pricingType = filterPricingType as "WEIGHT" | "ITEM";
 
       const res = await laundryItemService.getAllLaundryItems(query);
 
@@ -61,19 +66,26 @@ export function useLaundryItemList() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, debouncedSearch, filterCategory]);
+  }, [
+    pagination.page,
+    pagination.limit,
+    debouncedSearch,
+    filterCategory,
+    filterPricingType,
+  ]);
 
   // Reset ke page 1 saat filter berubah
   useEffect(() => {
     if (isInitialMount.current) return;
     setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [debouncedSearch, filterCategory]);
+  }, [debouncedSearch, filterCategory, filterPricingType]);
 
   // Sinkronisasi URL & trigger fetch
   useEffect(() => {
     const urlParams: Record<string, string | null> = {
       search: debouncedSearch || null,
       category: filterCategory !== "all" ? filterCategory : null,
+      pricingType: filterPricingType !== "all" ? filterPricingType : null,
       page: pagination.page !== 1 ? String(pagination.page) : null,
       limit: pagination.limit !== 10 ? String(pagination.limit) : null,
     };
@@ -87,6 +99,7 @@ export function useLaundryItemList() {
   const clearFilters = () => {
     setSearch("");
     setFilterCategory("all");
+    setFilterPricingType("all");
     setPagination((prev) => ({ ...prev, page: 1, limit: 10 }));
   };
 
@@ -97,6 +110,8 @@ export function useLaundryItemList() {
     setSearch,
     filterCategory,
     setFilterCategory,
+    filterPricingType,
+    setFilterPricingType,
     clearFilters,
     pagination,
     handlePageChange: (page: number) =>

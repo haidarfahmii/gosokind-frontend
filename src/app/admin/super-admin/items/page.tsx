@@ -23,6 +23,8 @@ function LaundryItemsContent() {
     setSearch,
     filterCategory,
     setFilterCategory,
+    filterPricingType,
+    setFilterPricingType,
     clearFilters,
     pagination,
     handlePageChange,
@@ -80,8 +82,10 @@ function LaundryItemsContent() {
       <LaundryItemFilters
         search={search}
         filterCategory={filterCategory}
+        filterPricingType={filterPricingType}
         onSearchChange={setSearch}
         onCategoryChange={setFilterCategory}
+        onPricingTypeChange={setFilterPricingType}
         onClearFilters={clearFilters}
         itemsPerPage={pagination.limit}
         onItemsPerPageChange={handleLimitChange}

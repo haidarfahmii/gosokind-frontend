@@ -16,8 +16,10 @@ import { CATEGORY_OPTIONS } from "../types";
 interface LaundryItemFiltersProps {
   search: string;
   filterCategory: string;
+  filterPricingType: string;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
+  onPricingTypeChange: (value: string) => void;
   onClearFilters: () => void;
   itemsPerPage?: number;
   onItemsPerPageChange?: (limit: number) => void;
@@ -26,13 +28,16 @@ interface LaundryItemFiltersProps {
 export function LaundryItemFilters({
   search,
   filterCategory,
+  filterPricingType,
   onSearchChange,
   onCategoryChange,
+  onPricingTypeChange,
   onClearFilters,
   itemsPerPage = 10,
   onItemsPerPageChange,
 }: LaundryItemFiltersProps) {
-  const hasActiveFilters = search !== "" || filterCategory !== "all";
+  const hasActiveFilters =
+    search !== "" || filterCategory !== "all" || filterPricingType !== "all";
 
   return (
     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 w-full">
@@ -60,6 +65,18 @@ export function LaundryItemFilters({
                 {cat}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        {/* Pricing Type Filter */}
+        <Select value={filterPricingType} onValueChange={onPricingTypeChange}>
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue placeholder="Semua Tipe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Tipe</SelectItem>
+            <SelectItem value="WEIGHT">Kiloan</SelectItem>
+            <SelectItem value="ITEM">Satuan</SelectItem>
           </SelectContent>
         </Select>
 

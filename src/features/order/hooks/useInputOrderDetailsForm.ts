@@ -34,16 +34,41 @@ export const useInputOrderDetailsForm = ({
 }: UseInputOrderDetailsFormProps) => {
   const { laundryItems, loadingItems } = useLaundryItems(open);
 
+  // Pisahkan laundry items berdasarkan tipe untuk kemudahan akses di form
+  const kiloanLaundryItems = laundryItems.filter(
+    (li) => li.pricingType === "WEIGHT",
+  );
+  const satuanLaundryItems = laundryItems.filter(
+    (li) => li.pricingType === "ITEM",
+  );
+
   const formik = useFormik<InputOrderDetailsFormValues>({
     initialValues: {
+      hasKiloan: false,
       totalWeight: 0,
-      items: [{ laundryItemId: "", quantity: 1 }],
+      kiloanItems: [{ laundryItemId: "", quantity: 1 }],
+      hasSatuan: false,
+      satuanItems: [{ laundryItemId: "", quantity: 1 }],
     },
     validationSchema: inputOrderDetailsSchema,
     onSubmit: async (values, { setSubmitting }) => {
       if (!order) return;
       try {
-        const response = await orderService.inputOrderDetails(order.id, values);
+        // Gabungkan kiloan + satuan items ke dalam satu array untuk API
+        const combinedItems = [
+          ...(values.hasKiloan ? values.kiloanItems : []),
+          ...(values.hasSatuan ? values.satuanItems : []),
+        ];
+
+        const payload = {
+          totalWeight: values.hasKiloan ? values.totalWeight : 0,
+          items: combinedItems,
+        };
+
+        const response = await orderService.inputOrderDetails(
+          order.id,
+          payload,
+        );
         if (response.success) {
           toast.success("Order details saved successfully");
           onSuccess();
@@ -61,39 +86,94 @@ export const useInputOrderDetailsForm = ({
     },
   });
 
-  const handleAddItem = () => {
-    formik.setFieldValue("items", [
-      ...formik.values.items,
+  const handleAddKiloanItem = () => {
+    formik.setFieldValue("kiloanItems", [
+      ...formik.values.kiloanItems,
       { laundryItemId: "", quantity: 1 },
     ]);
   };
 
-  const handleRemoveItem = (index: number) => {
-    if (formik.values.items.length === 1) {
-      toast.error("At least one item is required");
+  const handleRemoveKiloanItem = (index: number) => {
+    if (formik.values.kiloanItems.length === 1) {
+      toast.error("Minimal 1 item kiloan diperlukan");
       return;
     }
     formik.setFieldValue(
-      "items",
-      formik.values.items.filter((_, i) => i !== index),
+      "kiloanItems",
+      formik.values.kiloanItems.filter((_, i) => i !== index),
     );
   };
 
-  const handleItemChange = (
+  const handleKiloanItemChange = (
     index: number,
     field: "laundryItemId" | "quantity",
     value: string | number,
   ) => {
-    const newItems = [...formik.values.items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    formik.setFieldValue("items", newItems);
+    const updated = formik.values.kiloanItems.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
+    formik.setFieldValue("kiloanItems", updated);
   };
 
-  const getTotalPrice = () =>
-    formik.values.items.reduce((total, item) => {
-      const found = laundryItems.find((li) => li.id === item.laundryItemId);
-      return found?.basePrice ? total + found.basePrice * item.quantity : total;
+  const handleAddSatuanItem = () => {
+    formik.setFieldValue("satuanItems", [
+      ...formik.values.satuanItems,
+      { laundryItemId: "", quantity: 1 },
+    ]);
+  };
+
+  const handleRemoveSatuanItem = (index: number) => {
+    if (formik.values.satuanItems.length === 1) {
+      toast.error("Minimal 1 item satuan diperlukan");
+      return;
+    }
+    formik.setFieldValue(
+      "satuanItems",
+      formik.values.satuanItems.filter((_, i) => i !== index),
+    );
+  };
+
+  const handleSatuanItemChange = (
+    index: number,
+    field: "laundryItemId" | "quantity",
+    value: string | number,
+  ) => {
+    const updated = formik.values.satuanItems.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
+    formik.setFieldValue("satuanItems", updated);
+  };
+
+  // Kalkulasi Preview Harga
+  const getKiloanRate = (): number => {
+    // Rate kiloan = basePrice dari kiloan item pertama yang dipilih admin
+    const firstSelected = formik.values.kiloanItems.find(
+      (i) => i.laundryItemId,
+    );
+    if (!firstSelected) return 0;
+    return (
+      kiloanLaundryItems.find((li) => li.id === firstSelected.laundryItemId)
+        ?.basePrice ?? 0
+    );
+  };
+
+  const getKiloanSubtotal = (): number => {
+    if (!formik.values.hasKiloan) return 0;
+    const rate = getKiloanRate();
+    return formik.values.totalWeight * rate;
+  };
+
+  const getSatuanSubtotal = (): number => {
+    if (!formik.values.hasSatuan) return 0;
+    return formik.values.satuanItems.reduce((sum, item) => {
+      const li = satuanLaundryItems.find((l) => l.id === item.laundryItemId);
+      return sum + (li?.basePrice ?? 0) * item.quantity;
     }, 0);
+  };
+
+  const getTotalPrice = (): number => {
+    return getKiloanSubtotal() + getSatuanSubtotal();
+  };
 
   const handleClose = () => {
     onClose(false);
@@ -102,11 +182,18 @@ export const useInputOrderDetailsForm = ({
 
   return {
     formik,
-    laundryItems,
+    kiloanLaundryItems,
+    satuanLaundryItems,
     loadingItems,
-    handleAddItem,
-    handleRemoveItem,
-    handleItemChange,
+    handleAddKiloanItem,
+    handleRemoveKiloanItem,
+    handleKiloanItemChange,
+    handleAddSatuanItem,
+    handleRemoveSatuanItem,
+    handleSatuanItemChange,
+    getKiloanRate,
+    getKiloanSubtotal,
+    getSatuanSubtotal,
     getTotalPrice,
     handleClose,
   };

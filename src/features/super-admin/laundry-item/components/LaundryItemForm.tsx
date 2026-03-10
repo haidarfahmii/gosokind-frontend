@@ -10,8 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Scale, Package } from "lucide-react";
 import { useLaundryItemForm } from "../hooks/useLaundryItemForm";
-import { LaundryItem, CATEGORY_OPTIONS, UNIT_OPTIONS } from "../types";
+import {
+  LaundryItem,
+  CATEGORY_OPTIONS,
+  UNIT_OPTIONS,
+  PRICING_TYPE_OPTIONS,
+} from "../types";
+import { Badge } from "@/components/ui/badge";
 
 interface LaundryItemFormProps {
   initialData?: LaundryItem;
@@ -26,8 +33,62 @@ export function LaundryItemForm(props: LaundryItemFormProps) {
     onClose: props.onCancel,
   });
 
+  const isWeightType = formik.values.pricingType === "WEIGHT";
+  const handlePricingTypeChange = (value: string) => {
+    formik.setFieldValue("pricingType", value);
+    // Auto-set unit saat pricingType berubah
+    if (value === "WEIGHT") {
+      formik.setFieldValue("unit", "Kg");
+    } else {
+      formik.setFieldValue("unit", "Pcs");
+    }
+  };
+
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label>
+          Tipe Harga <span className="text-red-500">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-3">
+          {PRICING_TYPE_OPTIONS.map((option) => {
+            const isSelected = formik.values.pricingType === option.value;
+            const Icon = option.value === "WEIGHT" ? Scale : Package;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handlePricingTypeChange(option.value)}
+                className={`
+                  p-3 rounded-lg border-2 text-left transition-all
+                  ${
+                    isSelected
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon
+                    className={`w-4 h-4 ${isSelected ? "text-blue-600" : "text-slate-400"}`}
+                  />
+                  <span
+                    className={`font-semibold text-sm ${isSelected ? "text-blue-700" : "text-slate-700"}`}
+                  >
+                    {option.label}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">{option.description}</p>
+              </button>
+            );
+          })}
+        </div>
+        {formik.touched.pricingType && formik.errors.pricingType && (
+          <p className="text-red-500 text-xs">{formik.errors.pricingType}</p>
+        )}
+      </div>
+
       {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Nama Item</Label>
@@ -67,24 +128,37 @@ export function LaundryItemForm(props: LaundryItemFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label>Satuan (Unit)</Label>
-          <Select
-            value={formik.values.unit || ""}
-            onValueChange={(val) => formik.setFieldValue("unit", val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih Unit" />
-            </SelectTrigger>
-            <SelectContent>
-              {UNIT_OPTIONS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {formik.touched.unit && formik.errors.unit && (
-            <p className="text-red-500 text-xs">{formik.errors.unit}</p>
+          <Label>
+            Satuan (Unit)
+            {isWeightType && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                Auto: Kg
+              </Badge>
+            )}
+          </Label>
+          {/* Jika WEIGHT, unit dikunci ke Kg */}
+          {isWeightType ? (
+            <Input
+              value="Kg"
+              disabled
+              className="bg-slate-100 text-slate-600"
+            />
+          ) : (
+            <Select
+              value={formik.values.unit || ""}
+              onValueChange={(val) => formik.setFieldValue("unit", val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih Unit" />
+              </SelectTrigger>
+              <SelectContent>
+                {UNIT_OPTIONS.filter((u) => u !== "Kg").map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
       </div>

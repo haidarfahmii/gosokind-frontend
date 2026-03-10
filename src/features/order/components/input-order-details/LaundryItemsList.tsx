@@ -22,6 +22,7 @@ interface LaundryItemsListProps {
     field: "laundryItemId" | "quantity",
     value: string | number,
   ) => void;
+  onItemSelect: (index: number, laundryItemId: string) => void;
 }
 
 /**
@@ -37,6 +38,7 @@ export function LaundryItemsList({
   onAddItem,
   onRemoveItem,
   onItemChange,
+  onItemSelect,
 }: LaundryItemsListProps) {
   return (
     <div className="space-y-4">
@@ -71,6 +73,7 @@ export function LaundryItemsList({
               index={index}
               laundryItems={laundryItems}
               onItemChange={onItemChange}
+              onItemSelect={onItemSelect}
               onRemove={onRemoveItem}
             />
           ))}

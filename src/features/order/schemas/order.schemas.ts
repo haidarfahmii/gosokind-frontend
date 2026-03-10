@@ -1,22 +1,52 @@
 import * as Yup from "yup";
 
-// Schema untuk Input Order Details (weight & items)
-export const inputOrderDetailsSchema = Yup.object().shape({
-  totalWeight: Yup.number()
-    .min(0.1, "Total weight must be at least 0.1 kg")
-    .required("Total weight is required"),
-  items: Yup.array()
-    .of(
-      Yup.object().shape({
-        laundryItemId: Yup.string().required("Laundry item is required"),
-        quantity: Yup.number()
-          .min(1, "Quantity must be at least 1")
-          .required("Quantity is required"),
-      }),
-    )
-    .min(1, "At least one item is required")
-    .required("Items are required"),
+const orderItemSchema = Yup.object({
+  laundryItemId: Yup.string().required("Pilih item"),
+  quantity: Yup.number()
+    .integer("Harus angka bulat")
+    .min(1, "Minimal 1 pcs")
+    .required("Jumlah wajib diisi"),
 });
+
+// Schema untuk Input Order Details (weight & items)
+export const inputOrderDetailsSchema = Yup.object()
+  .shape({
+    hasKiloan: Yup.boolean().required(),
+    totalWeight: Yup.number().when("hasKiloan", {
+      is: true,
+      then: (schema) =>
+        schema
+          .positive("Berat harus lebih dari 0 kg")
+          .required("Berat total wajib diisi untuk layanan kiloan"),
+      otherwise: (schema) => schema.optional().nullable(),
+    }),
+    kiloanItems: Yup.array()
+      .of(orderItemSchema)
+      .when("hasKiloan", {
+        is: true,
+        then: (schema) =>
+          schema.min(1, "Tambahkan minimal 1 item kiloan").required(),
+        otherwise: (schema) => schema.optional(),
+      }),
+
+    // Satuan Section
+    hasSatuan: Yup.boolean().required(),
+    satuanItems: Yup.array()
+      .of(orderItemSchema)
+      .when("hasSatuan", {
+        is: true,
+        then: (schema) =>
+          schema.min(1, "Tambahkan minimal 1 item satuan").required(),
+        otherwise: (schema) => schema.optional(),
+      }),
+  })
+  .test(
+    "at-least-one-service",
+    "Pilih minimal satu jenis layanan (kiloan atau satuan)",
+    (values) => {
+      return Boolean(values.hasKiloan || values.hasSatuan);
+    },
+  );
 
 // Schema untuk Handle Bypass Request
 export const handleBypassRequestSchema = Yup.object().shape({
@@ -30,11 +60,12 @@ export const handleBypassRequestSchema = Yup.object().shape({
 
 // TypeScript interfaces for form values
 export interface InputOrderDetailsFormValues {
+  hasKiloan: boolean;
   totalWeight: number;
-  items: Array<{
-    laundryItemId: string;
-    quantity: number;
-  }>;
+  kiloanItems: { laundryItemId: string; quantity: number }[];
+
+  hasSatuan: boolean;
+  satuanItems: { laundryItemId: string; quantity: number }[];
 }
 
 export interface HandleBypassRequestFormValues {

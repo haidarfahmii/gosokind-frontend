@@ -9,7 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Trash2, Scale, Package } from "lucide-react";
 import { LaundryItem } from "../types";
 import { formatCurrency } from "@/utils/formatters";
 import {
@@ -34,6 +35,29 @@ interface LaundryItemTableProps {
   onPageChange: (page: number) => void;
 }
 
+function PricingTypeBadge({ pricingType }: { pricingType: string }) {
+  if (pricingType === "WEIGHT") {
+    return (
+      <Badge
+        variant="outline"
+        className="border-blue-300 text-blue-700 bg-blue-50 gap-1"
+      >
+        <Scale className="w-3 h-3" />
+        Kiloan
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="border-green-300 text-green-700 bg-green-50 gap-1"
+    >
+      <Package className="w-3 h-3" />
+      Satuan
+    </Badge>
+  );
+}
+
 export function LaundryItemTable({
   data,
   isLoading,
@@ -56,6 +80,7 @@ export function LaundryItemTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Nama Item</TableHead>
+                <TableHead>Tipe</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead>Unit</TableHead>
                 <TableHead>Harga Dasar</TableHead>
@@ -73,10 +98,15 @@ export function LaundryItemTable({
                 data.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>
+                      <PricingTypeBadge pricingType={item.pricingType} />
+                    </TableCell>
                     <TableCell>{item.category || "-"}</TableCell>
                     <TableCell>{item.unit}</TableCell>
                     <TableCell>
-                      {item.basePrice ? formatCurrency(item.basePrice) : "-"}
+                      {item.basePrice
+                        ? `${formatCurrency(item.basePrice)} / ${item.pricingType === "WEIGHT" ? "kg" : "pcs"}`
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button

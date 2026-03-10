@@ -20,6 +20,7 @@ export const useLaundryItemForm = ({
   const formik = useFormik<CreateLaundryItemInput>({
     initialValues: {
       name: initialData?.name || "",
+      pricingType: initialData?.pricingType || "ITEM",
       category: initialData?.category || "",
       unit: initialData?.unit || "Pcs",
       basePrice: initialData?.basePrice || 0,

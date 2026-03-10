@@ -91,6 +91,7 @@ export function OrderTable({
                 onViewDetail={onViewDetail}
                 onInputDetails={onInputDetails}
                 canInputDetails={canInputDetails}
+                showOutletColumn={showOutletColumn}
                 colSpan={colSpan}
                 orderBypassRequests={getBypassRequestsForOrder(order.id)}
                 onViewOrderBypass={onViewOrderBypass}

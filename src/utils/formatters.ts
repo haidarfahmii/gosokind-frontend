@@ -38,3 +38,11 @@ export const formatDate = (iso: string): string =>
     month: "short",
     year: "numeric",
   });
+
+export const formatRole = (role?: string) => {
+  if (!role) return "Visitor";
+  return role
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};

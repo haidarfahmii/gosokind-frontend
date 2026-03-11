@@ -10,6 +10,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import CreateOrderModal from "@/features/orders/components/CreateOrderModal";
 import OrderStatusBadge from "@/components/home/OrderStatusBadge"; // Sesuaikan path jika berbeda
 import Image from "next/image";
+import PhoneAlertModal from "@/components/home/PhoneAlertModal";
 
 export default function HomePage() {
     const { data: session } = useSession();
@@ -23,6 +24,7 @@ export default function HomePage() {
     const [isLoadingOrder, setIsLoadingOrder] = useState(true);
 
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+    const [isPhoneAlertOpen, setIsPhoneAlertOpen] = useState(false);
     const userName = session?.user?.name?.split(" ")[0] || "Pelanggan";
 
     useEffect(() => {
@@ -153,7 +155,14 @@ export default function HomePage() {
                     {/* Action Button: Trigger Modal */}
                     <h2 className="font-semibold text-gray-800 mb-3">Layanan Kami</h2>
                     <button
-                        onClick={() => setIsOrderModalOpen(true)}
+                        onClick={() => {
+                            // Cek apakah user memiliki phone number
+                            if (!session?.user?.phone) {
+                                setIsPhoneAlertOpen(true);
+                            } else {
+                                setIsOrderModalOpen(true);
+                            }
+                        }}
                         className="w-full bg-blue-600 text-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-colors active:scale-[0.98]"
                     >
                         <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -172,6 +181,11 @@ export default function HomePage() {
                     isOpen={isOrderModalOpen}
                     onClose={() => setIsOrderModalOpen(false)}
                     addresses={allAddresses}
+                />
+
+                <PhoneAlertModal
+                    isOpen={isPhoneAlertOpen}
+                    onClose={() => setIsPhoneAlertOpen(false)}
                 />
             </div>
         </div>

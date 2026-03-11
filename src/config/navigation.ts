@@ -75,16 +75,6 @@ export const SIDEBAR_ITEMS: {
         },
       ],
     },
-    {
-      group: "Settings",
-      items: [
-        {
-          label: "Settings",
-          href: "/admin/super-admin/settings",
-          icon: Settings,
-        },
-      ],
-    },
   ],
   outletAdmin: [
     {
@@ -109,16 +99,6 @@ export const SIDEBAR_ITEMS: {
           label: "Reports",
           href: "/admin/outlet-admin/reports",
           icon: BarChart2,
-        },
-      ],
-    },
-    {
-      group: "Settings",
-      items: [
-        {
-          label: "Settings",
-          href: "/admin/outlet-admin/settings",
-          icon: Settings,
         },
       ],
     },

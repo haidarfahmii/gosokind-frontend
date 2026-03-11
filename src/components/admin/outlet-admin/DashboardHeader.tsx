@@ -1,19 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Bell, Menu, LogOut, User, Settings } from "lucide-react";
+import { Bell, Menu, LogOut, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { outletService } from "@/features/super-admin/outlet/services/outlet.service";
+import { getMenuByRole } from "@/config/navigation";
+import { formatRole } from "@/utils/formatters";
 import { toast } from "react-toastify";
 
 interface OutletInfo {
@@ -25,19 +21,25 @@ interface OutletInfo {
 
 export default function OutletAdminDashboardHeader() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+
+  // State untuk Outlet Info
   const [outletInfo, setOutletInfo] = useState<OutletInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // State untuk user menu dropdown (Sama seperti Super Admin)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false);
+
+  const user = session?.user;
+  const role = session?.user?.role;
+  const menuGroups = role ? getMenuByRole(role) : [];
 
   // Fetch outlet info dari backend
   useEffect(() => {
     const fetchOutletInfo = async () => {
       try {
         setLoading(true);
-
-        // Backend akan otomatis return outlet sesuai outletId dari token
-        // Karena outlet admin hanya punya 1 outlet
         const response = await outletService.getAllOutlets();
-
         if (response.success && response.data && response.data.length > 0) {
           // Outlet admin seharusnya hanya dapat 1 outlet
           setOutletInfo(response.data[0]);
@@ -54,14 +56,6 @@ export default function OutletAdminDashboardHeader() {
       fetchOutletInfo();
     }
   }, [session]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut({ callbackUrl: "/auth/employee/login" });
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-30 h-16 md:h-20 border-b bg-white flex items-center justify-between px-4 md:px-8">
@@ -91,98 +85,139 @@ export default function OutletAdminDashboardHeader() {
         </div>
       </div>
 
-      {/* Right Section - Actions */}
-      <div className="flex items-center gap-2 md:gap-4">
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative hover:bg-slate-100"
-            >
-              <Bell className="h-5 w-5 text-slate-600" />
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              >
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="max-h-96 overflow-y-auto">
-              <div className="p-4 hover:bg-slate-50 cursor-pointer">
-                <p className="text-sm font-medium">New Order #1234</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Customer: John Doe - 5 items
-                </p>
-                <p className="text-xs text-blue-600 mt-1">2 minutes ago</p>
-              </div>
-              <DropdownMenuSeparator />
-              <div className="p-4 hover:bg-slate-50 cursor-pointer">
-                <p className="text-sm font-medium">Employee Request</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Sarah needs approval for overtime
-                </p>
-                <p className="text-xs text-blue-600 mt-1">1 hour ago</p>
-              </div>
-              <DropdownMenuSeparator />
-              <div className="p-4 hover:bg-slate-50 cursor-pointer">
-                <p className="text-sm font-medium">Low Stock Alert</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Detergent stock is running low
-                </p>
-                <p className="text-xs text-blue-600 mt-1">3 hours ago</p>
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-blue-600 font-medium">
-              View All Notifications
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Right Section - Notifications & Profile */}
+      <div className="flex items-center gap-6">
+        {/* Notification */}
+        <div className="relative cursor-pointer">
+          <Bell className="w-5 h-5 text-slate-500 hover:text-indigo-600" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </div>
 
-        {/* Profile Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">
-                  {session?.user?.name?.charAt(0).toUpperCase() || "O"}
-                </span>
+        {/* User Profile with Dropdown Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            className="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-lg transition-all"
+          >
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-semibold text-slate-800">
+                {user?.name || "Guest"}
+              </p>
+              <p className="text-xs text-slate-500">{formatRole(user?.role)}</p>
+            </div>
+            <Avatar>
+              <AvatarImage
+                src={user?.avatarUrl || "https://github.com/shadcn.png"}
+              />
+              <AvatarFallback className="bg-slate-200 text-slate-600">
+                <User size={20} />
+              </AvatarFallback>
+            </Avatar>
+            <ChevronDown
+              size={14}
+              className={`text-slate-400 transition-transform duration-200 hidden md:block ${
+                isUserMenuOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {/* Dropdown Content */}
+          {isUserMenuOpen && (
+            <>
+              {/* Overlay to close dropdown */}
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setIsUserMenuOpen(false)}
+              ></div>
+
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-20 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                {/* User Info Header */}
+                <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage
+                        src={user?.avatarUrl || "https://github.com/shadcn.png"}
+                      />
+                      <AvatarFallback className="bg-slate-200 text-slate-600">
+                        <User size={20} />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {user?.email}
+                      </p>
+                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm mt-1 inline-block font-medium">
+                        {formatRole(user?.role)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items from Navigation Config */}
+                <div className="py-2">
+                  {menuGroups.map((group, groupIndex) => (
+                    <div key={groupIndex}>
+                      {/* Group Label */}
+                      <div className="px-4 py-2">
+                        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          {group.group}
+                        </h3>
+                      </div>
+
+                      {/* Group Items */}
+                      <div className="px-2 space-y-1">
+                        {group.items.map((item, itemIndex) => {
+                          const Icon = item.icon;
+                          const isActive =
+                            pathname === item.href ||
+                            pathname.startsWith(item.href + "/");
+
+                          return (
+                            <Link
+                              key={itemIndex}
+                              href={item.href}
+                              className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all ${
+                                isActive
+                                  ? "bg-blue-50 text-blue-600 font-medium"
+                                  : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
+                              }`}
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              <Icon size={16} className="shrink-0" />
+                              <span className="truncate">{item.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      {/* Separator between groups */}
+                      {groupIndex < menuGroups.length - 1 && (
+                        <div className="my-2 border-t border-slate-100"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Logout Button */}
+                <div className="border-t border-slate-100 px-2 pt-2">
+                  <button
+                    onClick={() =>
+                      signOut({ callbackUrl: "/auth/employee/login" })
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left font-medium"
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </button>
+                </div>
               </div>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-slate-700">
-                  {session?.user?.name || "Outlet Admin"}
-                </p>
-                <p className="text-xs text-slate-500">Outlet Admin</p>
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleLogout}
-              className="text-red-600 focus:text-red-600"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

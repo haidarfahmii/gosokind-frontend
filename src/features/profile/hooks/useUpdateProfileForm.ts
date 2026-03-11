@@ -14,6 +14,7 @@ export const useUpdateProfileForm = () => {
         initialValues: {
             fullName: "",
             email: "",
+            phone: "",
             avatar: null as File | null,
         },
         validationSchema: updateProfileSchema,
@@ -25,11 +26,13 @@ export const useUpdateProfileForm = () => {
 
                 if (
                     values.fullName !== session?.user?.name ||
-                    values.email !== session?.user?.email
+                    values.email !== session?.user?.email ||
+                    values.phone !== session?.user?.phone
                 ) {
                     await updateProfileData({
                         fullName: values.fullName,
                         email: values.email,
+                        phone: values.phone
                     });
                 }
 
@@ -55,6 +58,7 @@ export const useUpdateProfileForm = () => {
                     await updateSession({
                         name: values.fullName,
                         avatarUrl: newAvatarUrl,
+                        phone: values.phone,
                     });
 
                     toast.success("Profil berhasil diperbarui!");
@@ -75,6 +79,7 @@ export const useUpdateProfileForm = () => {
             formik.setValues({
                 fullName: session.user.name || "",
                 email: session.user.email || "",
+                phone: session.user.phone || "",
                 avatar: null,
             });
             // Set preview awal dari session (avatarUrl)

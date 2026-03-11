@@ -4,6 +4,7 @@ export interface RegisterFormValues {
 
 export interface VerifyFormValues {
   fullName: string;
+  phone: string;
   password: string;
   token: string;
 }
@@ -31,6 +32,7 @@ export interface User {
   birthDate?: string;
   avatarUrl?: string;
   provider: string;
+  phone?: string;
 }
 
 export interface AuthResponse {

@@ -9,6 +9,7 @@ declare module "next-auth" {
     accessToken: string;
     avatarUrl?: string | null;
     provider: string;
+    phone?: string | null;
   }
 
   interface Session {
@@ -18,7 +19,8 @@ declare module "next-auth" {
       accessToken: string;
       name: string;
       avatarUrl?: string | null;
-      provider: string
+      provider: string;
+      phone?: string | null;
     } & DefaultSession["user"];
   }
 }
@@ -31,6 +33,7 @@ declare module "next-auth/jwt" {
     accessToken: string;
     name: string;
     avatarUrl?: string | null;
-    provider: string
+    provider: string;
+    phone?: string | null;
   }
 }

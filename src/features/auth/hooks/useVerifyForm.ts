@@ -22,6 +22,7 @@ export const useVerifyForm = (token: string) => {
   const formik = useFormik({
     initialValues: {
       fullName: "",
+      phone: "",
       password: "",
       confirmPassword: "",
     },
@@ -37,6 +38,7 @@ export const useVerifyForm = (token: string) => {
         setIsLoading(true);
         await authService.verify({
           fullName: values.fullName,
+          phone: values.phone,
           password: values.password,
           token: token,
         });

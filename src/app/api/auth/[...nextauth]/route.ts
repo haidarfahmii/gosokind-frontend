@@ -63,7 +63,8 @@ const nextAuthHandler = NextAuth({
               role: user.role,
               accessToken: token,
               avatarUrl: user.avatarUrl,
-              provider: user.provider
+              provider: user.provider,
+              phone: user.phone || null,
             };
           }
           return null;
@@ -155,7 +156,8 @@ const nextAuthHandler = NextAuth({
             email: user.email,
             name: user.name,
             googleId: user.id, // atau sub dari profile
-            // avatarUrl: user.image
+            avatarUrl: user.image,
+            phone: user.phone
           });
 
           const apiResponse = response.data;
@@ -164,6 +166,8 @@ const nextAuthHandler = NextAuth({
             user.accessToken = apiResponse.data.token;
             user.id = apiResponse.data.user.id;
             user.role = apiResponse.data.user.role;
+            user.avatarUrl = apiResponse.data.user.avatarUrl;
+            user.phone = apiResponse.data.user.phone;
             return true; // Izinkan login
           }
           return false; // Tolak login jika backend gagal
@@ -181,6 +185,7 @@ const nextAuthHandler = NextAuth({
         token.role = user?.role;
         token.name = user?.name;
         token.avatarUrl = user?.avatarUrl;
+        token.phone = user?.phone;
 
         if (account?.provider === "google") {
           token.accessToken = user.accessToken;
@@ -209,6 +214,11 @@ const nextAuthHandler = NextAuth({
           token.accessToken = session.accessToken;
           console.log("Token accessToken updated:", token.accessToken);
         }
+
+        if (session.phone !== undefined) {
+          token.phone = session.phone;
+          console.log("Token phone updated:", token.phone);
+        }
       }
 
       if (account) {
@@ -226,6 +236,7 @@ const nextAuthHandler = NextAuth({
         session.user.accessToken = token.accessToken;
         session.user.name = token.name;
         session.user.avatarUrl = token.avatarUrl;
+        session.user.phone = token.phone as string | null;
       }
 
       if (session.user) {

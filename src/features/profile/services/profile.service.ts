@@ -1,6 +1,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 
-export const updateProfileData = async (data: { fullName: string; email: string }) => {
+export const updateProfileData = async (data: { fullName: string; email: string; phone: string }) => {
     try {
         const response = await axiosInstance.patch("/profile/update", data);
         return response.data;

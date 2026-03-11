@@ -128,11 +128,6 @@ export function OrderDetailPageContent({
               {order.orderNumber}
             </span>
           </div>
-          {/* <Badge
-            className={`${statusConfig.bgColor} ${statusConfig.color} text-sm px-3 py-1`}
-          >
-            {statusConfig.label}
-          </Badge> */}
 
           {/* ── Bypass Request Action Button ── */}
           {hasPendingBypass && (

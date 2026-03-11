@@ -16,6 +16,7 @@ export const laundryItemService = {
     if (query?.limit) params.append("limit", query.limit.toString());
     if (query?.search) params.append("search", query.search);
     if (query?.category) params.append("category", query.category);
+    if (query?.pricingType) params.append("pricingType", query.pricingType);
 
     const response = await axiosInstance.get(
       `/laundry-items?${params.toString()}`,

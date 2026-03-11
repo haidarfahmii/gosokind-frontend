@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { getMenuByRole, SidebarGroup, SidebarItem } from "@/config/navigation";
-import { cn } from "@/lib/utils"; // Pastikan utils cn ada, atau pakai template literal biasa
+import { cn } from "@/lib/utils";
+import { formatRole } from "@/utils/formatters";
 
-// Sub-component untuk Item Menu Individual
 const SidebarItemComponent = ({
   item,
   isActive,
@@ -42,8 +42,6 @@ export default function Sidebar() {
 
   // Ambil role user dari session
   const userRole = session?.user?.role || "";
-
-  // Dapatkan menu yang sesuai menggunakan helper function kamu
   const menuGroups: SidebarGroup[] = getMenuByRole(userRole);
 
   return (
@@ -60,7 +58,7 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
         {menuGroups.map((group, groupIndex) => (
           <div key={groupIndex}>
-            {/* Label Group (Opsional: tampilkan jika ada lebih dari 1 group & punya nama) */}
+            {/* Label Group */}
             {group.group && (
               <h3 className="mb-2 px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 {group.group}
@@ -88,12 +86,14 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User Info / Bottom Section (Opsional) */}
+      {/* User Info / Bottom Section */}
       <div className="p-4 border-t">
         <div className="flex items-center gap-3">
           <div className="text-xs text-slate-500">
             Logged in as:{" "}
-            <span className="font-semibold text-slate-700">{userRole}</span>
+            <span className="font-semibold text-slate-700">
+              {formatRole(userRole)}
+            </span>
           </div>
         </div>
       </div>

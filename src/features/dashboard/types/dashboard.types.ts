@@ -1,8 +1,8 @@
 export interface DashboardStats {
-  totalOrders: number;
   pendingOrders: number;
-  completedToday: number;
-  todayRevenue: number;
+  processingOrders: number;
+  readyToDelivery: number;
+  deliveredOrders: number;
   activeEmployees: number;
   pendingBypassRequests: number;
   // Super Admin only
@@ -28,22 +28,4 @@ export interface DashboardRevenuePoint {
   totalRevenue: number;
   totalOrders: number;
   paidOrders: number;
-}
-
-export interface DashboardData {
-  stats: DashboardStats;
-  recentOrders: DashboardRecentOrder[];
-  revenueData: DashboardRevenuePoint[];
-  loading: boolean;
-  error: string | null;
-}
-
-export interface StatCardItem {
-  label: string;
-  value: string | number;
-  change?: string;
-  icon: React.ElementType;
-  iconBg: string;
-  iconColor: string;
-  changeColor?: string;
 }

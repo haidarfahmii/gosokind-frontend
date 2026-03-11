@@ -12,33 +12,38 @@ const orderItemSchema = Yup.object({
 export const inputOrderDetailsSchema = Yup.object()
   .shape({
     hasKiloan: Yup.boolean().required(),
-    totalWeight: Yup.number().when("hasKiloan", {
-      is: true,
-      then: (schema) =>
-        schema
-          .positive("Berat harus lebih dari 0 kg")
-          .required("Berat total wajib diisi untuk layanan kiloan"),
-      otherwise: (schema) => schema.optional().nullable(),
-    }),
-    kiloanItems: Yup.array()
-      .of(orderItemSchema)
+    totalWeight: Yup.number()
+      .typeError("Berat harus berupa angka")
+      .nullable()
       .when("hasKiloan", {
         is: true,
         then: (schema) =>
-          schema.min(1, "Tambahkan minimal 1 item kiloan").required(),
-        otherwise: (schema) => schema.optional(),
+          schema
+            .positive("Berat harus lebih dari 0 kg")
+            .required("Berat total wajib diisi untuk layanan kiloan"),
+        otherwise: (schema) => schema.optional().nullable(),
       }),
+    kiloanItems: Yup.array().when("hasKiloan", {
+      is: true,
+      then: (schema) =>
+        schema
+          .of(orderItemSchema)
+          .min(1, "Tambahkan minimal 1 item kiloan")
+          .required(),
+      otherwise: (schema) => schema.optional(),
+    }),
 
     // Satuan Section
     hasSatuan: Yup.boolean().required(),
-    satuanItems: Yup.array()
-      .of(orderItemSchema)
-      .when("hasSatuan", {
-        is: true,
-        then: (schema) =>
-          schema.min(1, "Tambahkan minimal 1 item satuan").required(),
-        otherwise: (schema) => schema.optional(),
-      }),
+    satuanItems: Yup.array().when("hasSatuan", {
+      is: true,
+      then: (schema) =>
+        schema
+          .of(orderItemSchema)
+          .min(1, "Tambahkan minimal 1 item satuan")
+          .required(),
+      otherwise: (schema) => schema.optional(),
+    }),
   })
   .test(
     "at-least-one-service",

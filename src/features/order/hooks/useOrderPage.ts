@@ -131,6 +131,7 @@ export function useOrderPage() {
     pagination,
     handlePageChange,
     handleLimitChange,
+    refetch: refetchOrders,
 
     // Outlets
     outlets,

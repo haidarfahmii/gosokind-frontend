@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Bell, User, LogOut, ChevronDown } from "lucide-react";
+import { Bell, User, LogOut, ChevronDown } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import { getMenuByRole } from "@/config/navigation";
 import { usePathname } from "next/navigation";
 import { useOutletFilter } from "@/hooks/useOutletFilter";
 import { EmployeeRole } from "@/@types/employee.types";
+import { formatRole } from "@/utils/formatters";
 
 export default function DashboardHeader() {
   const { data: session } = useSession();
@@ -70,14 +70,6 @@ export default function DashboardHeader() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="h-8 w-px bg-slate-200 hidden md:block mx-2"></div>
-            <div className="flex items-center gap-2 text-slate-400">
-              <Search className="w-4 h-4" />
-              <Input
-                placeholder="Global Search..."
-                className="border-none shadow-none focus-visible:ring-0 w-64 bg-transparent placeholder:text-slate-400"
-              />
-            </div>
           </>
         )}
       </div>
@@ -100,9 +92,7 @@ export default function DashboardHeader() {
               <p className="text-sm font-semibold text-slate-800">
                 {user?.name || "Guest"}
               </p>
-              <p className="text-xs text-slate-500">
-                {user?.role || "Visitor"}
-              </p>
+              <p className="text-xs text-slate-500">{formatRole(user?.role)}</p>
             </div>
             <Avatar>
               <AvatarImage
@@ -150,7 +140,7 @@ export default function DashboardHeader() {
                         {user?.email}
                       </p>
                       <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm mt-1 inline-block font-medium">
-                        {user?.role}
+                        {formatRole(user?.role)}
                       </span>
                     </div>
                   </div>

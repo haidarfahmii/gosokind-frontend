@@ -21,14 +21,14 @@ export function CustomerInfoCard({ order }: CustomerInfoCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="min-w-0">
             <p className="text-sm text-slate-600">Name</p>
-            <p className="font-medium">{order.customer.fullName}</p>
+            <p className="font-medium truncate">{order.customer.fullName}</p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-slate-600">Email</p>
-            <p className="font-medium">{order.customer.email}</p>
+            <p className="font-medium break-all">{order.customer.email}</p>
           </div>
         </div>
         <div>

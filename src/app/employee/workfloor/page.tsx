@@ -8,6 +8,7 @@ import BypassModal from "@/features/employee/components/workfloor/BypassModal";
 import { WorkfloorSkeleton } from "@/features/employee/components/workfloor/WorkfloorSkeleton";
 import { NewOrderAlert } from "@/features/employee/components/workfloor/NewOrderAlert";
 import { Notification } from "@/features/employee/components/workfloor/NotificationCenter";
+import { BusyDriverModal } from "@/features/employee/components/workfloor/BusyDriverModal";
 import DriverView from "@/features/employee/components/workfloor/DriverView";
 import WorkerView from "@/features/employee/components/workfloor/WorkerView";
 import {
@@ -63,6 +64,7 @@ export default function WorkfloorPage() {
   }>({ isOpen: false, orderId: "", orderNumber: "", details: [] });
 
   const { toast } = useToast();
+  const [isBusyDialogOpen, setIsBusyDialogOpen] = useState<boolean>(false);
 
   const isDriver = role === "DRIVER";
   const station = mapRoleToStation(role);
@@ -72,29 +74,48 @@ export default function WorkfloorPage() {
     (role === "SUPER_ADMIN" || role === "OUTLET_ADMIN" ? "WASHING" : "WASHING");
 
   // ── React Query hooks ────────────────────────────────────────────────────
-  // ── React Query hooks ────────────────────────────────────────────────────
   const { data: driverJobsResponse, isLoading: isDriverJobsLoading } =
-    useAvailableJobs(page, 10, sortBy, timeFilter, !!isDriver && activeTab === "active");
+    useAvailableJobs(
+      page,
+      10,
+      sortBy,
+      timeFilter,
+      !!isDriver && activeTab === "active",
+    );
   const driverJobs = driverJobsResponse?.data || [];
   const driverActiveMeta = driverJobsResponse?.meta || { lastPage: 1 };
 
   const { data: activeDriverJob = null, isLoading: isActiveJobLoading } =
     useActiveJob(!!isDriver);
-  
+
   const { data: historyJobsResponse } = useDriverHistory(
-    page, 10, sortBy, timeFilter, !!isDriver && activeTab === "history"
+    page,
+    10,
+    sortBy,
+    timeFilter,
+    !!isDriver && activeTab === "history",
   );
   const historyJobs = historyJobsResponse?.data || [];
   const driverHistoryMeta = historyJobsResponse?.meta || { lastPage: 1 };
 
   const { data: workerHistoryResponse } = useWorkerHistory(
-    page, 10, sortBy, timeFilter, !isDriver && activeTab === "history"
+    page,
+    10,
+    sortBy,
+    timeFilter,
+    !isDriver && activeTab === "history",
   );
   const workerHistory = workerHistoryResponse?.data || [];
   const workerHistoryMeta = workerHistoryResponse?.meta || { lastPage: 1 };
 
   const { data: stationOrdersResponse, isLoading: isStationOrdersLoading } =
-    useStationOrders(isDriver ? null : effectiveStation, page, 10, sortBy, timeFilter);
+    useStationOrders(
+      isDriver ? null : effectiveStation,
+      page,
+      10,
+      sortBy,
+      timeFilter,
+    );
   const stationOrders = stationOrdersResponse?.data || [];
   const workerActiveMeta = stationOrdersResponse?.meta || { lastPage: 1 };
 
@@ -213,6 +234,11 @@ export default function WorkfloorPage() {
   };
 
   const handleAcceptJob = (jobId: string) => {
+    if (activeDriverJob) {
+      setIsBusyDialogOpen(true);
+      return;
+    }
+
     acceptJobMutate(
       { jobId },
       {
@@ -297,46 +323,54 @@ export default function WorkfloorPage() {
         {isLoading ? (
           <WorkfloorSkeleton />
         ) : isDriver ? (
-            <DriverView
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              driverJobs={driverJobs}
-              activeJob={activeDriverJob}
-              historyJobs={historyJobs}
-              onAccept={handleAcceptJob}
-              onComplete={handleCompleteJob}
-              notifications={notifications}
-              onMarkAsRead={handleMarkAsRead}
-              onClearAll={handleClearNotifications}
-              // Pagination & Filters
-              page={page}
-              setPage={setPage}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              timeFilter={timeFilter}
-              setTimeFilter={setTimeFilter}
-              lastPage={activeTab === "active" ? driverActiveMeta.lastPage : driverHistoryMeta.lastPage}
-            />
-          ) : (
-            <WorkerView
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              stationOrders={stationOrders}
-              workerHistory={workerHistory}
-              effectiveStation={effectiveStation}
-              onProcess={handleProcess}
-              notifications={notifications}
-              onMarkAsRead={handleMarkAsRead}
-              onClearAll={handleClearNotifications}
-              // Pagination & Filters
-              page={page}
-              setPage={setPage}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              timeFilter={timeFilter}
-              setTimeFilter={setTimeFilter}
-              lastPage={activeTab === "active" ? workerActiveMeta.lastPage : workerHistoryMeta.lastPage}
-            />
+          <DriverView
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            driverJobs={driverJobs}
+            activeJob={activeDriverJob}
+            historyJobs={historyJobs}
+            onAccept={handleAcceptJob}
+            onComplete={handleCompleteJob}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onClearAll={handleClearNotifications}
+            // Pagination & Filters
+            page={page}
+            setPage={setPage}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
+            lastPage={
+              activeTab === "active"
+                ? driverActiveMeta.lastPage
+                : driverHistoryMeta.lastPage
+            }
+          />
+        ) : (
+          <WorkerView
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            stationOrders={stationOrders}
+            workerHistory={workerHistory}
+            effectiveStation={effectiveStation}
+            onProcess={handleProcess}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onClearAll={handleClearNotifications}
+            // Pagination & Filters
+            page={page}
+            setPage={setPage}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
+            lastPage={
+              activeTab === "active"
+                ? workerActiveMeta.lastPage
+                : workerHistoryMeta.lastPage
+            }
+          />
         )}
 
         <BypassModal
@@ -353,6 +387,11 @@ export default function WorkfloorPage() {
             setNewOrderAlert((prev) => ({ ...prev, isOpen: false }))
           }
           orderNumber={newOrderAlert.orderNumber}
+        />
+
+        <BusyDriverModal
+          isOpen={isBusyDialogOpen}
+          onClose={() => setIsBusyDialogOpen(false)}
         />
       </div>
     </AttendanceGuard>

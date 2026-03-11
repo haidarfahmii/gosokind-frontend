@@ -52,7 +52,7 @@ export function OrderFilters({
   return (
     <div className="space-y-3">
       {/* First Row: Status & Outlet Filters */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+      <div className="flex flex-wrap items-center gap-3 w-full">
         {/* Status Filter */}
         <Select value={selectedStatus} onValueChange={onStatusChange}>
           <SelectTrigger className="w-full sm:w-48">
@@ -106,9 +106,9 @@ export function OrderFilters({
         )}
 
         {/* Second Row: Date Range Filters */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Calendar className="w-4 h-4 text-slate-500" />
+            <Calendar className="w-4 h-4 text-slate-500 hidden sm:block" />
             <Input
               type="date"
               value={startDate}

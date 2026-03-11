@@ -56,7 +56,7 @@ export function NotificationCenter({
             </Button>
           )}
         </div>
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="h-75">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-8 text-center text-gray-500">
               <Bell className="h-8 w-8 mb-2 opacity-20" />

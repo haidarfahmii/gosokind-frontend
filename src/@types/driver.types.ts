@@ -6,6 +6,7 @@ export interface DriverJobDTO {
   status: "WAITING_FOR_PICKUP" | "delivery_on_the_way" | "completed"; // Add specific backend enums
   customer: {
     fullName: string;
+    phone?: string | null;
   };
   address: {
     address: string;
@@ -26,6 +27,7 @@ export interface DriverJob {
   type: "PICKUP" | "DELIVERY";
   status: "WAITING" | "IN_PROGRESS" | "COMPLETED" | string; // Allow string fallback but encourage params
   customerName: string;
+  customerPhone?: string | null;
   address: string;
   itemCount: number;
   date: string;

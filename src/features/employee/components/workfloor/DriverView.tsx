@@ -115,7 +115,7 @@ export default function DriverView({
               <h2 className="text-xl font-bold mb-4 text-green-700">
                 Current Active Job
               </h2>
-              <div className="max-w-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DriverJobCard
                   job={activeJob}
                   onAccept={onAccept}

@@ -8,6 +8,11 @@ export const updateProfileSchema = Yup.object().shape({
     email: Yup.string()
         .required("Email wajib diisi")
         .email("Format email tidak valid"),
+    phone: Yup.string() // Tambahkan validasi phone
+        .required("Nomor telepon wajib diisi")
+        .matches(/^[0-9]+$/, "Hanya boleh berisi angka")
+        .min(10, "Nomor telepon minimal 10 angka")
+        .max(15, "Nomor telepon maksimal 15 angka"),
     avatar: Yup.mixed()
         .nullable()
         .notRequired()

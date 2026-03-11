@@ -68,6 +68,28 @@ export default function VerifyEmailForm({ token }: VerifyEmailFormProps) {
         )}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="081234567890"
+          disabled={isLoading}
+          value={formik.values.phone}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          className={
+            formik.touched.phone && formik.errors.phone
+              ? "border-red-500"
+              : ""
+          }
+        />
+        {formik.touched.phone && formik.errors.phone && (
+          <p className="text-xs text-red-500 ml-1">{formik.errors.phone}</p>
+        )}
+      </div>
+
       {/* Password Field */}
       <div className="space-y-2">
         <Label htmlFor="password">New Password</Label>

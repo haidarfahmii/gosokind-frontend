@@ -69,6 +69,24 @@ export default function UpdateProfileForm() {
                 )}
             </div>
 
+            {/* Phone Number */}
+            <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="081234567890"
+                    value={formik.values.phone}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    disabled={isLoading}
+                />
+                {formik.touched.phone && formik.errors.phone && (
+                    <p className="text-sm text-red-500">{formik.errors.phone as string}</p>
+                )}
+            </div>
+
             {/* Email */}
             <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

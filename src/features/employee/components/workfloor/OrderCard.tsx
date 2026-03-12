@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Check } from "lucide-react";
+import { Lock, Check, Loader2 } from "lucide-react";
 import { StationOrder, StationType } from "@/@types/worker.types";
 import QuantityInput from "./QuantityInput";
 
@@ -20,7 +20,7 @@ interface OrderCardProps {
   onProcess: (
     orderId: string,
     items: { laundryItemId: string; quantity: number }[],
-  ) => void;
+  ) => Promise<void>;
 }
 
 export default function OrderCard({
@@ -36,13 +36,19 @@ export default function OrderCard({
   );
 
   const isLocked = order.isLocked;
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleProcess = () => {
-    const payloadItems = order.items.map((item) => ({
-      laundryItemId: item.id,
-      quantity: inputs[item.id] || 0,
-    }));
-    onProcess(order.id, payloadItems);
+  const handleProcess = async () => {
+    setIsProcessing(true);
+    try {
+      const payloadItems = order.items.map((item) => ({
+        laundryItemId: item.id,
+        quantity: inputs[item.id] || 0,
+      }));
+      await onProcess(order.id, payloadItems);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -123,8 +129,17 @@ export default function OrderCard({
       </CardContent>
 
       <CardFooter className="pt-2 border-t bg-gray-50/50">
-        <Button className="w-full" onClick={handleProcess} disabled={isLocked}>
-          {station === "PACKING" ? (
+        <Button
+          className="w-full"
+          onClick={handleProcess}
+          disabled={isLocked || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : station === "PACKING" ? (
             <>
               <Check className="mr-2 h-4 w-4" />
               Finish Packing

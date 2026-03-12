@@ -16,8 +16,8 @@ interface DriverViewProps {
   driverJobs: DriverJob[];
   activeJob: DriverJob | null;
   historyJobs: DriverJob[];
-  onAccept: (jobId: string) => void;
-  onComplete: (jobId: string, type: string) => void;
+  onAccept: (jobId: string) => Promise<void>;
+  onComplete: (jobId: string, type: string) => Promise<void>;
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
   onClearAll: () => void;

@@ -15,15 +15,18 @@ import {
   User,
   CheckCircle,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DriverJobCardProps {
   job: DriverJob;
-  onAccept: (jobId: string) => void;
-  onComplete?: (jobId: string, type: string) => void;
+  onAccept: (jobId: string) => Promise<void>;
+  onComplete?: (jobId: string, type: string) => Promise<void>;
   isLoading?: boolean;
 }
+
+import { useState } from "react";
 
 export default function DriverJobCard({
   job,
@@ -36,6 +39,21 @@ export default function DriverJobCard({
     job.status === "IN_PROGRESS" ||
     job.status === "PICKUP_ON_THE_WAY" ||
     job.status === "DELIVERY_ON_THE_WAY";
+
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleClick = async () => {
+    setIsProcessing(true);
+    try {
+      if (isInProgress && onComplete) {
+        await onComplete(job.id, job.type);
+      } else {
+        await onAccept(job.id);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Card className="hover:shadow-lg transition-all duration-300 border-transparent hover:border-gray-200 overflow-hidden flex flex-col h-full bg-white group relative shadow-sm">
@@ -153,13 +171,14 @@ export default function DriverJobCard({
               ? "bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-md"
               : "bg-slate-900 hover:bg-slate-800 text-white hover:shadow-md group-hover:-translate-y-0.5",
           )}
-          onClick={() => {
-            if (isInProgress && onComplete) onComplete(job.id, job.type);
-            else onAccept(job.id);
-          }}
-          disabled={isLoading}
+          onClick={handleClick}
+          disabled={isLoading || isProcessing}
         >
-          {isInProgress ? (
+          {isProcessing || isLoading ? (
+            <span className="flex items-center">
+              Processing... <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+            </span>
+          ) : isInProgress ? (
             <span className="flex items-center">
               Complete Job <CheckCircle className="w-4 h-4 ml-2" />
             </span>

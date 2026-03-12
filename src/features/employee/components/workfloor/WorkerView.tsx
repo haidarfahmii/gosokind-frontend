@@ -23,7 +23,7 @@ interface WorkerViewProps {
   onProcess: (
     orderId: string,
     items: { laundryItemId: string; quantity: number }[],
-  ) => void;
+  ) => Promise<void>;
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
   onClearAll: () => void;

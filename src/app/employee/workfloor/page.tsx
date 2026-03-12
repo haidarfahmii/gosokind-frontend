@@ -119,9 +119,9 @@ export default function WorkfloorPage() {
   const stationOrders = stationOrdersResponse?.data || [];
   const workerActiveMeta = stationOrdersResponse?.meta || { lastPage: 1 };
 
-  const { mutate: processOrderMutate } = useProcessOrder();
-  const { mutate: acceptJobMutate } = useAcceptJob();
-  const { mutate: completeJobMutate } = useCompleteJob();
+  const { mutateAsync: processOrderAsync } = useProcessOrder();
+  const { mutateAsync: acceptJobAsync } = useAcceptJob();
+  const { mutateAsync: completeJobAsync } = useCompleteJob();
   const { mutateAsync: submitBypassAsync } = useSubmitBypass();
 
   // ── Notification State ───────────────────────────────────────────────────
@@ -203,82 +203,71 @@ export default function WorkfloorPage() {
     localStorage.removeItem(`gosokind_notifs_${userId}`);
   };
 
-  const handleProcess = (
+  const handleProcess = async (
     orderId: string,
     items: { laundryItemId: string; quantity: number }[],
   ) => {
-    processOrderMutate(
-      { orderId, station: effectiveStation, items, actualQty: 0 },
-      {
-        onSuccess: () =>
-          toast({ title: "Success", description: "Order processed." }),
-        onError: (error: any) => {
-          if (error.response?.data?.message === "QTY_MISMATCH") {
-            const order = stationOrders.find((o) => o.id === orderId);
-            setBypassData({
-              isOpen: true,
-              orderId,
-              orderNumber: order?.orderNumber || "Unknown",
-              details: error.response.data.details || [],
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: error.response?.data?.message || "Failed to process",
-              variant: "destructive",
-            });
-          }
-        },
-      },
-    );
+    try {
+      await processOrderAsync({ orderId, station: effectiveStation, items, actualQty: 0 });
+      toast({ title: "Success", description: "Order processed." });
+    } catch (error: any) {
+      if (error.response?.data?.message === "QTY_MISMATCH") {
+        const order = stationOrders.find((o) => o.id === orderId);
+        setBypassData({
+          isOpen: true,
+          orderId,
+          orderNumber: order?.orderNumber || "Unknown",
+          details: error.response.data.details || [],
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to process",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
-  const handleAcceptJob = (jobId: string) => {
+  const handleAcceptJob = async (jobId: string) => {
     if (activeDriverJob) {
       setIsBusyDialogOpen(true);
       return;
     }
 
-    acceptJobMutate(
-      { jobId },
-      {
-        onSuccess: () =>
-          toast({
-            title: "Job Accepted",
-            description: "You accepted the job.",
-          }),
-        onError: (error: any) => {
-          const msg =
-            error.response?.data?.message === "DRIVER_BUSY"
-              ? "You already have an active job. Please complete it first."
-              : "Failed to accept job.";
-          toast({
-            title: "Cannot Accept Job",
-            description: msg,
-            variant: "destructive",
-          });
-        },
-      },
-    );
+    try {
+      await acceptJobAsync({ jobId });
+      toast({
+        title: "Job Accepted",
+        description: "You accepted the job.",
+      });
+    } catch (error: any) {
+      const msg =
+        error.response?.data?.message === "DRIVER_BUSY"
+          ? "You already have an active job. Please complete it first."
+          : "Failed to accept job.";
+      toast({
+        title: "Cannot Accept Job",
+        description: msg,
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCompleteJob = (jobId: string, type: string) => {
-    completeJobMutate(
-      { jobId, type },
-      {
-        onSuccess: () =>
-          toast({
-            title: "Job Completed",
-            description: "You are now available for new jobs.",
-          }),
-        onError: () =>
-          toast({
-            title: "Error",
-            description: "Failed to complete job.",
-            variant: "destructive",
-          }),
-      },
-    );
+  const handleCompleteJob = async (jobId: string, type: string) => {
+    try {
+      await completeJobAsync({ jobId, type });
+      toast({
+        title: "Job Completed",
+        description: "You are now available for new jobs.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to complete job.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleBypassSubmit = async (reason: string): Promise<void> => {
